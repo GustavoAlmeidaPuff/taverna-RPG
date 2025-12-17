@@ -63,7 +63,26 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.map((product) => (
-            <div key={product.id} className="bg-card rounded-lg overflow-hidden relative group flex flex-col">
+            <div key={product.id} className="rounded-lg overflow-hidden relative group" style={{ backgroundColor: '#1d1816', border: '1px solid #DFA026' }}>
+              {/* Badge */}
+              {product.badge && (
+                <div className={`absolute top-2 left-2 z-10 px-2 py-1 rounded text-xs font-bold ${
+                  product.badge === 'oferta' || product.discount
+                    ? 'bg-destructive text-destructive-text'
+                    : 'bg-primary text-primary-text'
+                }`}>
+                  {product.badge === 'oferta' && product.discount ? `OFERTA -${product.discount}%` : 
+                   product.badge === 'novo' ? 'NOVO' :
+                   product.badge === 'lançamento' ? 'LANÇAMENTO' :
+                   product.discount ? `-${product.discount}%` : ''}
+                </div>
+              )}
+              {!product.badge && product.discount && (
+                <div className="absolute top-2 right-2 z-10 px-2 py-1 rounded text-xs font-bold bg-destructive text-destructive-text">
+                  -{product.discount}%
+                </div>
+              )}
+
               {/* Imagem do produto do Shopify com fade */}
               <div 
                 className="h-64 relative group overflow-hidden"
@@ -86,25 +105,6 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
                   />
                 )}
 
-                {/* Badge oval amarelo-ouro no canto superior esquerdo */}
-                {product.badge && (
-                  <div className={`absolute top-3 left-3 z-10 px-3 py-1 rounded-full text-xs font-bold ${
-                    product.badge === 'oferta' || product.discount
-                      ? 'bg-destructive text-destructive-text'
-                      : 'bg-yellow-400 text-black'
-                  }`}>
-                    {product.badge === 'oferta' && product.discount ? `OFERTA -${product.discount}%` : 
-                     product.badge === 'novo' ? 'NOVO' :
-                     product.badge === 'lançamento' ? 'LANÇAMENTO' :
-                     product.discount ? `-${product.discount}%` : ''}
-                  </div>
-                )}
-                {!product.badge && product.discount && (
-                  <div className="absolute top-3 right-3 z-10 px-3 py-1 rounded-full text-xs font-bold bg-destructive text-destructive-text">
-                    -{product.discount}%
-                  </div>
-                )}
-
                 {/* Action Buttons - aparecem no hover */}
                 <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <button className="w-10 h-10 bg-card border border-border rounded-full flex items-center justify-center hover:bg-primary hover:border-primary transition-colors">
@@ -120,28 +120,24 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
                 </div>
               </div>
 
-              {/* Informações do produto - fundo preto sólido */}
-              <div className="bg-black p-4 flex-1 flex flex-col">
-                {/* Nome do produto em maiúsculas, branco, negrito */}
+              <div className="p-4">
+                {/* PLACEHOLDER PRODUCT NAME - será conectado ao Shopify */}
                 <Link href={`/produto/${product.handle}`}>
-                  <h3 className="text-white font-bold mb-3 uppercase text-sm hover:text-primary transition-colors leading-tight">
-                    {product.name}
-                  </h3>
+                  <h3 className="text-card-text font-bold mb-2 hover:text-primary transition-colors uppercase">{product.name}</h3>
                 </Link>
                 
-                {/* Preço em laranja/dourado, negrito, fonte maior */}
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-1">
                   {product.originalPrice && (
                     <span className="text-muted-text line-through text-sm">
                       de R$ {product.originalPrice.toFixed(2).replace('.', ',')}
                     </span>
                   )}
-                  <span className="text-primary font-bold text-xl">
+                  {/* PLACEHOLDER PRICE - será conectado ao Shopify */}
+                  <span className="text-primary font-bold text-lg">
                     R$ {product.price.toFixed(2).replace('.', ',')}
                   </span>
                 </div>
-                
-                {/* Parcelamento em cinza claro, fonte menor */}
+                {/* PLACEHOLDER INSTALLMENT - será calculado dinamicamente */}
                 <p className="text-muted-text text-sm">
                   ou 12x de R$ {(product.price / 12).toFixed(2).replace('.', ',')} sem juros
                 </p>
