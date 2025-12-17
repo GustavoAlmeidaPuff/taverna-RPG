@@ -72,6 +72,7 @@ export interface Product {
   discount?: number;
   badge?: 'novo' | 'oferta' | 'lançamento';
   image: string;
+  images?: string[]; // Array de imagens para hover
   description?: string;
   handle: string;
 }
@@ -184,14 +185,18 @@ export async function getAllProducts(limit: number = 20): Promise<Product[]> {
     const data = await adminApiRequest(`products.json?limit=${limit}`);
     
     const products = data.products || [];
-    return products.map((p: any) => ({
-      id: p.id.toString(),
-      name: p.title,
-      price: parseFloat(p.variants[0]?.price || '0'),
-      image: p.images[0]?.src || '',
-      description: p.body_html || '',
-      handle: p.handle,
-    }));
+    return products.map((p: any) => {
+      const allImages = (p.images || []).map((img: any) => img.src).filter(Boolean);
+      return {
+        id: p.id.toString(),
+        name: p.title,
+        price: parseFloat(p.variants[0]?.price || '0'),
+        image: allImages[0] || '',
+        images: allImages.length > 1 ? allImages : undefined, // Só inclui se tiver mais de uma imagem
+        description: p.body_html || '',
+        handle: p.handle,
+      };
+    });
   } catch (error) {
     console.error('Erro ao buscar produtos do Shopify:', error);
     // Retorna array vazio em caso de erro para não quebrar a aplicação
@@ -208,11 +213,13 @@ export async function getProductByHandle(handle: string): Promise<Product | null
     const product = data.products?.[0];
     if (!product) return null;
     
+    const allImages = (product.images || []).map((img: any) => img.src).filter(Boolean);
     return {
       id: product.id.toString(),
       name: product.title,
       price: parseFloat(product.variants[0]?.price || '0'),
-      image: product.images[0]?.src || '',
+      image: allImages[0] || '',
+      images: allImages.length > 1 ? allImages : undefined, // Só inclui se tiver mais de uma imagem
       description: product.body_html || '',
       handle: product.handle,
     };

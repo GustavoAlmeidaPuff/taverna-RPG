@@ -21,3 +21,34 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Estilos para HTML renderizado das descrições do Shopify */
+.prose h1,
+.prose h2,
+.prose h3 {
+  color: #ebe8e0;
+  font-weight: bold;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose p {
+  color: #ebe8e0;
+  margin-bottom: 1em;
+}
+
+.prose span {
+  color: #ebe8e0;
+}
+
+.prose ul,
+.prose ol {
+  color: #ebe8e0;
+  margin-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.prose li {
+  color: #ebe8e0;
+  margin-bottom: 0.5em;
+}

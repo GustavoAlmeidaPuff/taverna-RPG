@@ -1,6 +1,10 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '@/lib/shopify';
+import { useCart } from '@/contexts/CartContext';
 
 interface ProductsProps {
   title: string;
@@ -9,6 +13,29 @@ interface ProductsProps {
 }
 
 export default function Products({ title, subtitle, products }: ProductsProps) {
+  const { addItem } = useCart();
+  const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
+
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(product);
+  };
+
+  const getPrimaryImage = (product: Product): string => {
+    if (product.images && product.images.length > 0) {
+      return product.images[0];
+    }
+    return product.image || '/images/placeholder.png';
+  };
+
+  const getSecondaryImage = (product: Product): string | null => {
+    if (product.images && product.images.length > 1) {
+      return product.images[1];
+    }
+    return null;
+  };
+
   return (
     <section className="bg-background py-16">
       <div className="container mx-auto px-4">
@@ -36,61 +63,85 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.map((product) => (
-            <div key={product.id} className="bg-card rounded-lg overflow-hidden relative group">
-              {/* Badge */}
-              {product.badge && (
-                <div className={`absolute top-2 left-2 z-10 px-2 py-1 rounded text-xs font-bold ${
-                  product.badge === 'oferta' || product.discount
-                    ? 'bg-destructive text-destructive-text'
-                    : 'bg-primary text-primary-text'
-                }`}>
-                  {product.badge === 'oferta' && product.discount ? `OFERTA -${product.discount}%` : 
-                   product.badge === 'novo' ? 'NOVO' :
-                   product.badge === 'lançamento' ? 'LANÇAMENTO' :
-                   product.discount ? `-${product.discount}%` : ''}
-                </div>
-              )}
-              {!product.badge && product.discount && (
-                <div className="absolute top-2 right-2 z-10 px-2 py-1 rounded text-xs font-bold bg-destructive text-destructive-text">
-                  -{product.discount}%
-                </div>
-              )}
-
-              {/* Imagem do produto do Shopify */}
+            <div key={product.id} className="bg-card rounded-lg overflow-hidden relative group flex flex-col">
+              {/* Imagem do produto do Shopify com fade */}
               <div 
-                className="h-64 bg-cover bg-center relative group"
-                style={{ backgroundImage: `url(${product.image || '/images/placeholder.png'})` }}
+                className="h-64 relative group overflow-hidden"
+                onMouseEnter={() => product.images && product.images.length > 1 && setHoveredProductId(product.id)}
+                onMouseLeave={() => setHoveredProductId(null)}
               >
+                {/* Imagem principal - sempre visível */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url(${getPrimaryImage(product)})` }}
+                />
+                
+                {/* Imagem secundária - fade in/out no hover */}
+                {getSecondaryImage(product) && (
+                  <div 
+                    className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${
+                      hoveredProductId === product.id ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    style={{ backgroundImage: `url(${getSecondaryImage(product)})` }}
+                  />
+                )}
+
+                {/* Badge oval amarelo-ouro no canto superior esquerdo */}
+                {product.badge && (
+                  <div className={`absolute top-3 left-3 z-10 px-3 py-1 rounded-full text-xs font-bold ${
+                    product.badge === 'oferta' || product.discount
+                      ? 'bg-destructive text-destructive-text'
+                      : 'bg-yellow-400 text-black'
+                  }`}>
+                    {product.badge === 'oferta' && product.discount ? `OFERTA -${product.discount}%` : 
+                     product.badge === 'novo' ? 'NOVO' :
+                     product.badge === 'lançamento' ? 'LANÇAMENTO' :
+                     product.discount ? `-${product.discount}%` : ''}
+                  </div>
+                )}
+                {!product.badge && product.discount && (
+                  <div className="absolute top-3 right-3 z-10 px-3 py-1 rounded-full text-xs font-bold bg-destructive text-destructive-text">
+                    -{product.discount}%
+                  </div>
+                )}
+
                 {/* Action Buttons - aparecem no hover */}
-                <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <button className="w-10 h-10 bg-card border border-border rounded-full flex items-center justify-center hover:bg-primary hover:border-primary transition-colors">
                     <Heart className="text-card-text w-5 h-5" />
                   </button>
-                  <button className="bg-primary text-primary-text px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 hover:opacity-90 transition-opacity">
+                  <button 
+                    onClick={(e) => handleAddToCart(e, product)}
+                    className="bg-primary text-primary-text px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 hover:opacity-90 transition-opacity"
+                  >
                     <ShoppingCart className="w-4 h-4" />
                     <span>Adicionar ao Baú</span>
                   </button>
                 </div>
               </div>
 
-              <div className="p-4">
-                {/* PLACEHOLDER PRODUCT NAME - será conectado ao Shopify */}
+              {/* Informações do produto - fundo preto sólido */}
+              <div className="bg-black p-4 flex-1 flex flex-col">
+                {/* Nome do produto em maiúsculas, branco, negrito */}
                 <Link href={`/produto/${product.handle}`}>
-                  <h3 className="text-card-text font-bold mb-2 hover:text-primary transition-colors">{product.name}</h3>
+                  <h3 className="text-white font-bold mb-3 uppercase text-sm hover:text-primary transition-colors leading-tight">
+                    {product.name}
+                  </h3>
                 </Link>
                 
-                <div className="flex items-center gap-2 mb-1">
+                {/* Preço em laranja/dourado, negrito, fonte maior */}
+                <div className="flex items-center gap-2 mb-2">
                   {product.originalPrice && (
                     <span className="text-muted-text line-through text-sm">
                       de R$ {product.originalPrice.toFixed(2).replace('.', ',')}
                     </span>
                   )}
-                  {/* PLACEHOLDER PRICE - será conectado ao Shopify */}
-                  <span className="text-primary font-bold text-lg">
+                  <span className="text-primary font-bold text-xl">
                     R$ {product.price.toFixed(2).replace('.', ',')}
                   </span>
                 </div>
-                {/* PLACEHOLDER INSTALLMENT - será calculado dinamicamente */}
+                
+                {/* Parcelamento em cinza claro, fonte menor */}
                 <p className="text-muted-text text-sm">
                   ou 12x de R$ {(product.price / 12).toFixed(2).replace('.', ',')} sem juros
                 </p>

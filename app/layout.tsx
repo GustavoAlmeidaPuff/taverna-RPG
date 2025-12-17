@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel } from "next/font/google";
 import "./globals.css";
+import { CartProvider } from "@/contexts/CartContext";
 
 const cinzel = Cinzel({
   subsets: ["latin"],
@@ -23,7 +24,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={cinzel.variable}>
-      <body>{children}</body>
+      <body>
+        <CartProvider>
+          {children}
+        </CartProvider>
+      </body>
     </html>
   );
 }

@@ -1,9 +1,10 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
-import { ShoppingCart, Heart, Share2, Truck, Shield, RotateCcw, Star } from 'lucide-react';
+import { Truck, Shield, RotateCcw, Star } from 'lucide-react';
 import { getProductByHandle } from '@/lib/shopify';
 import { notFound } from 'next/navigation';
+import ProductActions from '@/components/ProductActions';
 
 export default async function ProductDetail({ params }: { params: { id: string } }) {
   // Buscar produto real do Shopify usando o handle
@@ -66,30 +67,18 @@ export default async function ProductDetail({ params }: { params: { id: string }
                 R$ {product.price.toFixed(2).replace('.', ',')}
               </p>
 
-              <p className="text-text mb-6 leading-relaxed">
-                {description}
-              </p>
+              {description && (
+                <div 
+                  className="text-text mb-6 leading-relaxed prose prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: description }}
+                  style={{
+                    color: '#ebe8e0'
+                  }}
+                />
+              )}
 
               {/* Quantity and Actions */}
-              <div className="mb-6">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center gap-2 border border-border rounded">
-                    <button className="px-4 py-2 text-text hover:bg-input">-</button>
-                    <span className="px-4 py-2 text-text">1</span>
-                    <button className="px-4 py-2 text-text hover:bg-input">+</button>
-                  </div>
-                  <button className="flex-1 bg-primary text-primary-text px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
-                    <ShoppingCart className="w-5 h-5" />
-                    <span>Adicionar ao Baú</span>
-                  </button>
-                  <button className="w-12 h-12 border border-border rounded-lg flex items-center justify-center hover:bg-input transition-colors">
-                    <Heart className="text-text w-5 h-5" />
-                  </button>
-                  <button className="w-12 h-12 border border-border rounded-lg flex items-center justify-center hover:bg-input transition-colors">
-                    <Share2 className="text-text w-5 h-5" />
-                  </button>
-                </div>
-              </div>
+              <ProductActions product={product} />
 
               {/* Features */}
               <div className="grid grid-cols-3 gap-4">
@@ -127,9 +116,17 @@ export default async function ProductDetail({ params }: { params: { id: string }
           {/* Description/Details */}
           <div>
             <h3 className="text-2xl font-bold text-text mb-4">DETALHES DO PRODUTO</h3>
-            <div className="text-text leading-relaxed whitespace-pre-line">
-              {description}
-            </div>
+            {description ? (
+              <div 
+                className="text-text leading-relaxed prose prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: description }}
+                style={{
+                  color: '#ebe8e0'
+                }}
+              />
+            ) : (
+              <p className="text-text">Nenhuma descrição disponível para este produto.</p>
+            )}
           </div>
         </div>
       </main>

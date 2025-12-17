@@ -5,9 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Search, User, X, Gift, Trash2, Icon } from 'lucide-react';
 import { chest } from '@lucide/lab';
+import { useCart } from '@/contexts/CartContext';
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { items, removeItem, updateQuantity, getTotal, getItemCount } = useCart();
 
   return (
     <>
@@ -75,9 +77,11 @@ export default function Header() {
               className="relative text-secondary-text hover:text-primary transition-colors"
             >
               <Icon iconNode={chest} className="w-6 h-6" />
-              <span className="absolute -top-2 -right-2 bg-primary text-primary-text text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                1
-              </span>
+              {getItemCount() > 0 && (
+                <span className="absolute -top-2 -right-2 bg-primary text-primary-text text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {getItemCount()}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -128,74 +132,115 @@ export default function Header() {
         </nav>
       </header>
 
-      {/* Cart Sidebar - será renderizado condicionalmente */}
+      {/* Cart Sidebar - Meu Baú */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setIsCartOpen(false)}></div>
-          <div className="relative ml-auto w-full max-w-md bg-background h-full overflow-y-auto">
+          <div className="relative ml-auto w-full max-w-md bg-[#201915] h-full overflow-y-auto border-l border-gray-700">
             <div className="p-6">
               {/* Cart Header */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
-                  <Gift className="text-primary w-6 h-6" />
-                  <h2 className="text-primary text-xl font-bold">MEU BAÚ</h2>
+                  <Icon iconNode={chest} className="w-6 h-6 text-[#e8b430]" />
+                  <h2 className="text-[#e8b430] text-xl font-bold uppercase">MEU BAÚ</h2>
                 </div>
                 <button 
                   onClick={() => setIsCartOpen(false)}
-                  className="text-secondary-text hover:text-primary"
+                  className="w-8 h-8 rounded-full bg-[#2a1f1a] flex items-center justify-center hover:bg-[#332520] transition-colors"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5 text-white" />
                 </button>
               </div>
 
-              {/* Cart Items - PLACEHOLDER: será conectado ao Shopify/Firebase */}
+              {/* Cart Items */}
               <div className="mb-6">
-                <div className="bg-card border border-primary rounded-lg p-4 mb-4">
-                  <div className="flex gap-4">
-                    {/* PLACEHOLDER IMAGE - será substituída por imagem do produto do Shopify */}
-                    <div className="w-20 h-20 bg-muted rounded flex items-center justify-center">
-                      <div className="w-12 h-12 bg-muted-text rounded-full flex items-center justify-center">
-                        <span className="text-background text-xs">IMG</span>
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      {/* PLACEHOLDER PRODUCT NAME - será conectado ao Shopify */}
-                      <h3 className="text-card-text font-bold mb-1">DADOS DE RPG - CONJUNTO AURORA</h3>
-                      {/* PLACEHOLDER PRICE - será conectado ao Shopify */}
-                      <p className="text-primary font-bold text-lg mb-2">R$ 49,90</p>
-                      <div className="flex items-center gap-2">
-                        <button className="bg-input border border-border rounded px-2 py-1 text-card-text">-</button>
-                        <span className="text-card-text px-2">1</span>
-                        <button className="bg-input border border-border rounded px-2 py-1 text-card-text">+</button>
-                        <button className="ml-auto text-destructive">
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </div>
+                {items.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400">Seu baú está vazio</p>
                   </div>
-                </div>
+                ) : (
+                  items.map((item) => (
+                    <div key={item.id} className="bg-[#2a1f1a] rounded-lg p-4 mb-4">
+                      <div className="flex gap-4">
+                        {/* Product Image */}
+                        <div className="w-20 h-20 rounded flex items-center justify-center flex-shrink-0 bg-gray-700 overflow-hidden">
+                          {item.image ? (
+                            <img 
+                              src={item.image} 
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-gray-500 rounded-full"></div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          {/* Product Name */}
+                          <h3 className="text-white font-bold text-sm mb-1 uppercase">{item.name}</h3>
+                          {/* Product Price */}
+                          <p className="text-[#e8b430] font-bold text-lg mb-3">
+                            R$ {item.price.toFixed(2).replace('.', ',')}
+                          </p>
+                          {/* Quantity Controls */}
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center border border-gray-600 rounded">
+                              <button 
+                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                className="bg-[#201915] text-white px-3 py-1.5 hover:bg-[#2a1f1a] transition-colors"
+                              >
+                                -
+                              </button>
+                              <span className="text-white px-4 py-1.5">{item.quantity}</span>
+                              <button 
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                className="bg-[#201915] text-white px-3 py-1.5 hover:bg-[#2a1f1a] transition-colors"
+                              >
+                                +
+                              </button>
+                            </div>
+                            <button 
+                              onClick={() => removeItem(item.id)}
+                              className="ml-auto text-[#e8b430] hover:text-[#f0c855] transition-colors"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* Cart Footer */}
-              <div className="border-t border-border pt-4">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-card-text">Total (sem frete):</span>
-                  {/* PLACEHOLDER TOTAL - será calculado dinamicamente */}
-                  <span className="text-primary font-bold text-xl">R$ 49,90</span>
+              {items.length > 0 && (
+                <div className="border-t border-gray-700 pt-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-white text-sm">Total (sem frete):</span>
+                    <span className="text-[#e8b430] font-bold text-xl">
+                      R$ {getTotal().toFixed(2).replace('.', ',')}
+                    </span>
+                  </div>
+                  <div className="flex gap-3 mb-4">
+                    <Link 
+                      href="/checkout"
+                      className="flex-1 border border-[#e8b430] text-[#e8b430] py-2.5 rounded font-semibold hover:bg-[#e8b430] hover:text-[#201915] transition-colors text-center"
+                    >
+                      Ver meu baú
+                    </Link>
+                    <Link
+                      href="/checkout"
+                      className="flex-1 bg-[#e8b430] text-[#201915] py-2.5 rounded font-bold hover:opacity-90 transition-opacity text-center"
+                    >
+                      FECHAR PEDIDO
+                    </Link>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-400 text-sm">
+                    <Gift className="text-[#e8b430] w-4 h-4" />
+                    <span>Frete grátis a partir de R$ 250,00</span>
+                  </div>
                 </div>
-                <div className="flex gap-2 mb-4">
-                  <button className="flex-1 border border-primary text-primary py-2 rounded hover:bg-primary hover:text-primary-text transition-colors">
-                    Ver meu baú
-                  </button>
-                  <button className="flex-1 bg-primary text-primary-text py-2 rounded font-bold hover:opacity-90 transition-opacity">
-                    FECHAR PEDIDO
-                  </button>
-                </div>
-                <div className="flex items-center gap-2 text-muted-text text-sm">
-                  <Gift className="text-primary w-4 h-4" />
-                  <span>Frete grátis a partir de R$ 250,00</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
