@@ -46,10 +46,15 @@ Abra [http://localhost:3000](http://localhost:3000) no seu navegador para ver o 
 ```
 tavernaRPG/
 ├── app/
+│   ├── api/
+│   │   └── products/         # APIs REST para produtos Shopify
 │   ├── page.tsx              # Página principal
 │   ├── produto/[id]/page.tsx # Página de detalhes do produto
 │   ├── layout.tsx             # Layout principal
 │   └── globals.css            # Estilos globais
+├── lib/
+│   ├── shopify.ts            # Cliente e funções Shopify
+│   └── types.ts              # Tipos TypeScript
 ├── components/
 │   ├── Header.tsx            # Cabeçalho com logo, busca e navegação
 │   ├── Hero.tsx              # Seção hero com banner principal
@@ -69,12 +74,28 @@ tavernaRPG/
 - `npm start` - Inicia o servidor de produção
 - `npm run lint` - Executa o ESLint
 
+## 🔌 Integração com Shopify
+
+A integração com Shopify foi configurada! Veja o arquivo `SHOPIFY_SETUP.md` para instruções detalhadas de configuração.
+
+**O que foi implementado:**
+- ✅ Cliente Shopify Storefront API configurado
+- ✅ Funções para buscar produtos (`getAllProducts`, `getProductByHandle`)
+- ✅ APIs REST (`/api/products`, `/api/products/[handle]`)
+- ✅ Tipos TypeScript para produtos
+
+**Para usar:**
+1. Crie um arquivo `.env.local` com suas credenciais Shopify
+2. Configure `SHOPIFY_STORE_DOMAIN` e `SHOPIFY_STOREFRONT_ACCESS_TOKEN`
+3. Use as funções em `lib/shopify.ts` ou as APIs REST para buscar produtos
+
 ## 📝 Próximos Passos
 
-1. **Integração com Shopify**
-   - Conectar produtos reais
-   - Implementar carrinho de compras funcional
-   - Integrar checkout
+1. **Integração com Shopify** (em progresso)
+   - ✅ Estrutura base configurada
+   - ⏳ Conectar produtos reais nas páginas
+   - ⏳ Implementar carrinho de compras funcional
+   - ⏳ Integrar checkout
 
 2. **Integração com Firebase**
    - Autenticação de usuários (Firebase Auth)

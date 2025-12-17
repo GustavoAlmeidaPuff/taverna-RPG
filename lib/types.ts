@@ -1,0 +1,25 @@
+// Tipos compartilhados para produtos
+
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  discount?: number;
+  badge?: 'novo' | 'oferta' | 'lançamento';
+  image: string;
+  description?: string;
+  handle: string;
+}
+
+export interface ProductDetail extends Product {
+  rating?: number;
+  reviews?: number;
+  specifications?: string[];
+  variants?: Array<{
+    id: string;
+    title: string;
+    price: number;
+    available: boolean;
+  }>;
+}
