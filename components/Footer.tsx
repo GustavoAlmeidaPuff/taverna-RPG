@@ -12,8 +12,8 @@ export default function Footer() {
               <Image 
                 src="/images/logo.png" 
                 alt="Taverna RPG Store Logo" 
-                width={24} 
-                height={24}
+                width={40} 
+                height={40}
                 className="object-contain"
               />
               <div>

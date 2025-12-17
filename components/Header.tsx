@@ -20,8 +20,8 @@ export default function Header() {
             <Image 
               src="/images/logo.png" 
               alt="Taverna RPG Store Logo" 
-              width={28} 
-              height={28}
+              width={48} 
+              height={48}
               className="object-contain"
             />
             <div>
