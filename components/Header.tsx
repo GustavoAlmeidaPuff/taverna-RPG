@@ -1,15 +1,97 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Search, User, X, Gift, Trash2, Menu, Icon } from 'lucide-react';
 import { chest } from '@lucide/lab';
 import { useCart } from '@/contexts/CartContext';
+import { Product } from '@/lib/shopify';
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   const { items, removeItem, updateQuantity, getTotal, getItemCount } = useCart();
+
+  // Função de busca com debounce
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (searchQuery.trim().length === 0) {
+      setSearchResults([]);
+      setIsSearchOpen(false);
+      return;
+    }
+
+    setIsSearching(true);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/products/search?q=${encodeURIComponent(searchQuery)}`);
+        const data = await response.json();
+        setSearchResults(data.products || []);
+        setIsSearchOpen(true);
+      } catch (error) {
+        console.error('Erro ao buscar produtos:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300); // Debounce de 300ms
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  // Fechar resultados ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target as Node) &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target as Node)
+      ) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+  };
+
+  const handleProductClick = (handle: string) => {
+    setIsSearchOpen(false);
+    setSearchQuery('');
+    router.push(`/produto/${handle}`);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/busca?q=${encodeURIComponent(searchQuery)}`);
+      setIsSearchOpen(false);
+      setSearchQuery('');
+    }
+  };
 
   return (
     <>
@@ -60,17 +142,81 @@ export default function Header() {
 
               {/* Search Bar - Desktop (na mesma linha) */}
               <div className="hidden md:block flex-1 max-w-2xl mx-8">
-                <div className="relative">
+                <form onSubmit={handleSearchSubmit} className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-text w-5 h-5" />
                   <input
+                    ref={searchInputRef}
                     type="text"
                     placeholder="O que você procura, aventureiro?"
+                    value={searchQuery}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    onFocus={() => searchQuery && setIsSearchOpen(true)}
                     className="w-full bg-input border border-border rounded-lg py-2 pl-10 pr-4 text-secondary-text placeholder-muted-text focus:outline-none focus:ring-2 focus:ring-focus-ring"
                     style={{
                       fontFamily: "'Cinzel', serif"
                     }}
                   />
-                </div>
+                  {/* Resultados da busca */}
+                  {isSearchOpen && (
+                    <div
+                      ref={searchContainerRef}
+                      className="absolute top-full left-0 right-0 mt-2 bg-[#1d1816] border border-[#DFA026] rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto"
+                    >
+                      {isSearching ? (
+                        <div className="p-4 text-center text-secondary-text">
+                          <p>Buscando...</p>
+                        </div>
+                      ) : searchResults.length > 0 ? (
+                        <>
+                          <div className="p-2 border-b border-[#DFA026]/20">
+                            <p className="text-sm text-secondary-text">
+                              {searchResults.length} resultado{searchResults.length !== 1 ? 's' : ''} encontrado{searchResults.length !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                          {searchResults.map((product) => (
+                            <button
+                              key={product.id}
+                              onClick={() => handleProductClick(product.handle)}
+                              className="w-full p-4 hover:bg-[#2a1f1a] transition-colors text-left flex items-center gap-4 border-b border-[#DFA026]/10 last:border-b-0"
+                            >
+                              {product.image && (
+                                <div className="w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-gray-700">
+                                  <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-secondary-text font-bold text-sm mb-1 truncate">
+                                  {product.name}
+                                </h3>
+                                <p className="text-[#DFA026] font-bold">
+                                  R$ {product.price.toFixed(2).replace('.', ',')}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+                          {searchQuery && (
+                            <div className="p-2 border-t border-[#DFA026]/20">
+                              <button
+                                type="submit"
+                                className="w-full text-center text-[#DFA026] hover:text-[#E0B64D] transition-colors text-sm font-semibold"
+                              >
+                                Ver todos os resultados para "{searchQuery}"
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="p-4 text-center text-secondary-text">
+                          <p>Nenhum produto encontrado</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </form>
               </div>
 
               {/* User and Cart Icons */}
@@ -95,17 +241,81 @@ export default function Header() {
 
             {/* Search Bar - Mobile (abaixo da logo) */}
             <div className="md:hidden">
-              <div className="relative">
+              <form onSubmit={handleSearchSubmit} className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-text w-5 h-5" />
                 <input
+                  ref={searchInputRef}
                   type="text"
                   placeholder="Buscar..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onFocus={() => searchQuery && setIsSearchOpen(true)}
                   className="w-full bg-input border border-border rounded-lg py-2 pl-10 pr-4 text-secondary-text placeholder-muted-text focus:outline-none focus:ring-2 focus:ring-focus-ring"
                   style={{
                     fontFamily: "'Cinzel', serif"
                   }}
                 />
-              </div>
+                {/* Resultados da busca - Mobile */}
+                {isSearchOpen && (
+                  <div
+                    ref={searchContainerRef}
+                    className="absolute top-full left-0 right-0 mt-2 bg-[#1d1816] border border-[#DFA026] rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto"
+                  >
+                    {isSearching ? (
+                      <div className="p-4 text-center text-secondary-text">
+                        <p>Buscando...</p>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <>
+                        <div className="p-2 border-b border-[#DFA026]/20">
+                          <p className="text-sm text-secondary-text">
+                            {searchResults.length} resultado{searchResults.length !== 1 ? 's' : ''} encontrado{searchResults.length !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                        {searchResults.map((product) => (
+                          <button
+                            key={product.id}
+                            onClick={() => handleProductClick(product.handle)}
+                            className="w-full p-4 hover:bg-[#2a1f1a] transition-colors text-left flex items-center gap-4 border-b border-[#DFA026]/10 last:border-b-0"
+                          >
+                            {product.image && (
+                              <div className="w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-gray-700">
+                                <img
+                                  src={product.image}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-secondary-text font-bold text-sm mb-1 truncate">
+                                {product.name}
+                              </h3>
+                              <p className="text-[#DFA026] font-bold">
+                                R$ {product.price.toFixed(2).replace('.', ',')}
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                        {searchQuery && (
+                          <div className="p-2 border-t border-[#DFA026]/20">
+                            <button
+                              type="submit"
+                              className="w-full text-center text-[#DFA026] hover:text-[#E0B64D] transition-colors text-sm font-semibold"
+                            >
+                              Ver todos os resultados para "{searchQuery}"
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="p-4 text-center text-secondary-text">
+                        <p>Nenhum produto encontrado</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </form>
             </div>
           </div>
         </div>
