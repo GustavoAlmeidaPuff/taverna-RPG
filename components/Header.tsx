@@ -8,9 +8,10 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-secondary">
-        {/* Top Bar */}
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <header>
+        {/* Top Bar - Preto */}
+        <div className="bg-background">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="text-primary text-2xl">🍺</div>
@@ -51,8 +52,9 @@ export default function Header() {
             </button>
           </div>
         </div>
+        </div>
 
-        {/* Navigation Bar */}
+        {/* Navigation Bar - Marrom escuro (Secondary) */}
         <nav className="bg-secondary border-t border-border">
           <div className="container mx-auto px-4">
             <ul className="flex items-center justify-center gap-8 py-3">
