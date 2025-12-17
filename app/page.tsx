@@ -3,7 +3,6 @@ import Hero from '@/components/Hero';
 import Features from '@/components/Features';
 import Categories from '@/components/Categories';
 import Products from '@/components/Products';
-import PaymentPromo from '@/components/PaymentPromo';
 import Footer from '@/components/Footer';
 
 export default function Home() {
@@ -89,7 +88,6 @@ export default function Home() {
           subtitle="Os mais novos tesouros da taverna"
           products={newArrivals}
         />
-        <PaymentPromo />
         <Products 
           title="MAIS VENDIDOS"
           subtitle="Os favoritos dos aventureiros"
