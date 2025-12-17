@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Heart, ShoppingCart } from 'lucide-react';
 
 interface Product {
   id: number;
@@ -69,10 +70,10 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
                 {/* Action Buttons - aparecem no hover */}
                 <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button className="w-10 h-10 bg-card border border-border rounded-full flex items-center justify-center hover:bg-primary hover:border-primary transition-colors">
-                    <span className="text-card-text">❤️</span>
+                    <Heart className="text-card-text w-5 h-5" />
                   </button>
                   <button className="bg-primary text-primary-text px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 hover:opacity-90 transition-opacity">
-                    <span>🛒</span>
+                    <ShoppingCart className="w-4 h-4" />
                     <span>Adicionar ao Baú</span>
                   </button>
                 </div>

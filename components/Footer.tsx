@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Beer, Instagram, Facebook, Youtube, Phone, Mail, MapPin } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -8,7 +9,7 @@ export default function Footer() {
           {/* Taverna Info */}
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <span className="text-primary text-2xl">🍺</span>
+              <Beer className="text-primary w-6 h-6" />
               <div>
                 <div className="text-primary font-bold">TAVERNA</div>
                 <div className="text-secondary-text text-sm">RPG STORE</div>
@@ -19,13 +20,13 @@ export default function Footer() {
             </p>
             <div className="flex gap-3">
               <Link href="#" className="w-10 h-10 bg-card rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                <span className="text-secondary-text">📷</span>
+                <Instagram className="text-secondary-text w-5 h-5" />
               </Link>
               <Link href="#" className="w-10 h-10 bg-card rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                <span className="text-secondary-text">👥</span>
+                <Facebook className="text-secondary-text w-5 h-5" />
               </Link>
               <Link href="#" className="w-10 h-10 bg-card rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                <span className="text-secondary-text">▶️</span>
+                <Youtube className="text-secondary-text w-5 h-5" />
               </Link>
             </div>
           </div>
@@ -75,15 +76,15 @@ export default function Footer() {
             {/* PLACEHOLDER CONTACT INFO - será conectado ao Firebase */}
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-secondary-text">
-                <span className="text-primary">📞</span>
+                <Phone className="text-primary w-4 h-4" />
                 <span>(11) 99999-9999</span>
               </div>
               <div className="flex items-center gap-2 text-secondary-text">
-                <span className="text-primary">✉️</span>
+                <Mail className="text-primary w-4 h-4" />
                 <span>contato@tavernarpg.com.br</span>
               </div>
               <div className="flex items-center gap-2 text-secondary-text">
-                <span className="text-primary">📍</span>
+                <MapPin className="text-primary w-4 h-4" />
                 <span>São Paulo, SP</span>
               </div>
             </div>

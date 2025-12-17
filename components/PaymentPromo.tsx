@@ -1,3 +1,5 @@
+import { Gift } from 'lucide-react';
+
 export default function PaymentPromo() {
   return (
     <section className="bg-background py-12 border-y border-border">
@@ -5,7 +7,7 @@ export default function PaymentPromo() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
           {/* Frete Grátis */}
           <div className="flex items-center gap-4">
-            <span className="text-primary text-4xl">🎁</span>
+            <Gift className="text-primary w-10 h-10" />
             <div>
               <h3 className="text-text font-bold text-lg mb-1">FRETE GRÁTIS</h3>
               <p className="text-muted-text">Em compras acima de R$ 250,00</p>

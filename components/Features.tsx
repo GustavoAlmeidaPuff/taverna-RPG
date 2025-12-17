@@ -1,22 +1,24 @@
+import { Truck, Shield, CreditCard, Phone } from 'lucide-react';
+
 export default function Features() {
   const features = [
     {
-      icon: "🚚",
+      icon: Truck,
       title: "Frete Grátis",
       description: "Acima de R$ 250"
     },
     {
-      icon: "🛡️",
+      icon: Shield,
       title: "Compra Segura",
       description: "Dados protegidos"
     },
     {
-      icon: "💳",
+      icon: CreditCard,
       title: "Parcele em 12x",
       description: "Sem juros"
     },
     {
-      icon: "📱",
+      icon: Phone,
       title: "Atendimento",
       description: "Via WhatsApp"
     }
@@ -26,15 +28,18 @@ export default function Features() {
     <section className="bg-background py-12">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-4 bg-card rounded-lg p-4">
-              <span className="text-primary text-3xl">{feature.icon}</span>
-              <div>
-                <h4 className="text-card-text font-bold">{feature.title}</h4>
-                <p className="text-muted-text text-sm">{feature.description}</p>
+          {features.map((feature, index) => {
+            const IconComponent = feature.icon;
+            return (
+              <div key={index} className="flex items-center gap-4 bg-card rounded-lg p-4">
+                <IconComponent className="text-primary w-8 h-8" />
+                <div>
+                  <h4 className="text-card-text font-bold">{feature.title}</h4>
+                  <p className="text-muted-text text-sm">{feature.description}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

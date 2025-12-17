@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
+import { ShoppingCart, Heart, Share2, Truck, Shield, RotateCcw, Star } from 'lucide-react';
 
 // PLACEHOLDER - será substituído por busca dinâmica do Shopify
 export default function ProductDetail({ params }: { params: { id: string } }) {
@@ -58,7 +59,7 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex gap-1">
                   {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-primary text-xl">★</span>
+                    <Star key={i} className="text-primary w-5 h-5 fill-current" />
                   ))}
                 </div>
                 <span className="text-text">
@@ -85,14 +86,14 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
                     <button className="px-4 py-2 text-text hover:bg-input">+</button>
                   </div>
                   <button className="flex-1 bg-primary text-primary-text px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
-                    <span>🛒</span>
+                    <ShoppingCart className="w-5 h-5" />
                     <span>Adicionar ao Baú</span>
                   </button>
                   <button className="w-12 h-12 border border-border rounded-lg flex items-center justify-center hover:bg-input transition-colors">
-                    <span className="text-text">❤️</span>
+                    <Heart className="text-text w-5 h-5" />
                   </button>
                   <button className="w-12 h-12 border border-border rounded-lg flex items-center justify-center hover:bg-input transition-colors">
-                    <span className="text-text">🔗</span>
+                    <Share2 className="text-text w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -100,16 +101,16 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
               {/* Features */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-card rounded-lg p-4 text-center">
-                  <span className="text-primary text-2xl block mb-2">🚚</span>
+                  <Truck className="text-primary w-8 h-8 mx-auto mb-2" />
                   <p className="text-card-text text-sm font-bold">Frete Grátis</p>
                   <p className="text-muted-text text-xs">acima de R$150</p>
                 </div>
                 <div className="bg-card rounded-lg p-4 text-center">
-                  <span className="text-primary text-2xl block mb-2">🛡️</span>
+                  <Shield className="text-primary w-8 h-8 mx-auto mb-2" />
                   <p className="text-card-text text-sm font-bold">Compra Segura</p>
                 </div>
                 <div className="bg-card rounded-lg p-4 text-center">
-                  <span className="text-primary text-2xl block mb-2">↩️</span>
+                  <RotateCcw className="text-primary w-8 h-8 mx-auto mb-2" />
                   <p className="text-card-text text-sm font-bold">Devolução em 30 dias</p>
                 </div>
               </div>

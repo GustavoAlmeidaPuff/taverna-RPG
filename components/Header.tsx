@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Search, User, ShoppingCart, X, Gift, Trash2 } from 'lucide-react';
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -14,7 +15,14 @@ export default function Header() {
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="text-primary text-2xl">🍺</div>
+            <div className="text-primary">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 2v6m8-6v6"/>
+                <path d="M6 8h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8z"/>
+                <path d="M10 18v4M14 18v4"/>
+                <path d="M12 8v10"/>
+              </svg>
+            </div>
             <div>
               <div className="text-primary font-bold text-xl">TAVERNA</div>
               <div className="text-secondary-text text-sm">RPG STORE</div>
@@ -24,9 +32,7 @@ export default function Header() {
           {/* Search Bar */}
           <div className="flex-1 max-w-2xl mx-8">
             <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-text">
-                🔍
-              </div>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-text w-5 h-5" />
               <input
                 type="text"
                 placeholder="O que você procura, aventureiro?"
@@ -38,14 +44,14 @@ export default function Header() {
           {/* User and Cart Icons */}
           <div className="flex items-center gap-4">
             <button className="flex items-center gap-2 text-secondary-text hover:text-primary transition-colors">
-              <span>👤</span>
+              <User className="w-5 h-5" />
               <span>Entrar</span>
             </button>
             <button 
               onClick={() => setIsCartOpen(true)}
               className="relative text-secondary-text hover:text-primary transition-colors"
             >
-              <span className="text-2xl">🛒</span>
+              <ShoppingCart className="w-6 h-6" />
               <span className="absolute -top-2 -right-2 bg-primary text-primary-text text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 1
               </span>
@@ -108,14 +114,14 @@ export default function Header() {
               {/* Cart Header */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
-                  <span className="text-primary text-2xl">🎁</span>
+                  <Gift className="text-primary w-6 h-6" />
                   <h2 className="text-primary text-xl font-bold">MEU BAÚ</h2>
                 </div>
                 <button 
                   onClick={() => setIsCartOpen(false)}
-                  className="text-secondary-text hover:text-primary text-2xl"
+                  className="text-secondary-text hover:text-primary"
                 >
-                  ×
+                  <X className="w-6 h-6" />
                 </button>
               </div>
 
@@ -138,7 +144,9 @@ export default function Header() {
                         <button className="bg-input border border-border rounded px-2 py-1 text-card-text">-</button>
                         <span className="text-card-text px-2">1</span>
                         <button className="bg-input border border-border rounded px-2 py-1 text-card-text">+</button>
-                        <button className="ml-auto text-destructive text-xl">🗑️</button>
+                        <button className="ml-auto text-destructive">
+                          <Trash2 className="w-5 h-5" />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -161,7 +169,7 @@ export default function Header() {
                   </button>
                 </div>
                 <div className="flex items-center gap-2 text-muted-text text-sm">
-                  <span className="text-primary">🎁</span>
+                  <Gift className="text-primary w-4 h-4" />
                   <span>Frete grátis a partir de R$ 250,00</span>
                 </div>
               </div>

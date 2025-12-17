@@ -1,3 +1,5 @@
+import { Beer, Dice6 } from 'lucide-react';
+
 export default function Hero() {
   return (
     <section className="relative min-h-[600px] flex items-center bg-background">
@@ -13,7 +15,7 @@ export default function Hero() {
         <div className="max-w-2xl">
           {/* Welcome Badge */}
           <div className="inline-flex items-center gap-2 border border-primary rounded px-4 py-2 mb-6">
-            <span className="text-primary">🍺</span>
+            <Beer className="text-primary w-5 h-5" />
             <span className="text-secondary-text">BEM-VINDO À TAVERNA</span>
           </div>
 
@@ -40,7 +42,7 @@ export default function Hero() {
 
           {/* Promo Banner */}
           <div className="bg-card border border-border rounded-lg p-4 inline-flex items-center gap-3">
-            <span className="text-2xl">🎲</span>
+            <Dice6 className="text-primary w-8 h-8" />
             <div>
               <p className="text-card-text font-bold">ROLOU CRÍTICO!</p>
               <p className="text-muted-text text-sm">Até 30% OFF em dados selecionados</p>
