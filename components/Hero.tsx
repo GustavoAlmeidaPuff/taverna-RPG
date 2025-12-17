@@ -56,7 +56,17 @@ export default function Hero() {
 
           {/* Action Buttons */}
           <div className="flex gap-4 mb-6">
-            <button className="bg-primary text-primary-text px-8 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+            <button 
+              className="px-8 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity uppercase"
+              style={{
+                background: 'linear-gradient(135deg, #e8a64a 0%, #d6891f 50%, #c77a1a 100%)',
+                color: '#2c1810',
+                border: '1px solid rgba(0, 0, 0, 0.25)',
+                fontFamily: "'Garamond', 'Palatino Linotype', 'Palatino', 'Times New Roman', serif",
+                letterSpacing: '0.03em',
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0, 0, 0, 0.2)'
+              }}
+            >
               EXPLORAR PRODUTOS
             </button>
             <button 
