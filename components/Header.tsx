@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Search, User, X, Gift, Trash2, Icon } from 'lucide-react';
 import { chest } from '@lucide/lab';
 
@@ -16,17 +17,35 @@ export default function Header() {
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="text-primary">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M8 2v6m8-6v6"/>
-                <path d="M6 8h12v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8z"/>
-                <path d="M10 18v4M14 18v4"/>
-                <path d="M12 8v10"/>
-              </svg>
-            </div>
+            <Image 
+              src="/images/logo.png" 
+              alt="Taverna RPG Store Logo" 
+              width={28} 
+              height={28}
+              className="object-contain"
+            />
             <div>
-              <div className="text-primary font-bold text-xl">TAVERNA</div>
-              <div className="text-secondary-text text-sm">RPG STORE</div>
+              <div 
+                className="font-bold text-xl"
+                style={{
+                  fontFamily: 'var(--font-cinzel), serif',
+                  color: '#DFA026',
+                  textShadow: '0 0 10px rgba(223, 160, 38, 0.5), 0 0 20px rgba(223, 160, 38, 0.3)'
+                }}
+              >
+                TAVERNA
+              </div>
+              <div 
+                className="text-sm"
+                style={{
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                  color: '#EAE7DF',
+                  letterSpacing: '0.15em',
+                  fontWeight: 500
+                }}
+              >
+                RPG STORE
+              </div>
             </div>
           </Link>
 

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Beer } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
@@ -9,7 +9,13 @@ export default function Footer() {
           {/* Taverna Info */}
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <Beer className="text-primary w-6 h-6" />
+              <Image 
+                src="/images/logo.png" 
+                alt="Taverna RPG Store Logo" 
+                width={24} 
+                height={24}
+                className="object-contain"
+              />
               <div>
                 <div className="text-primary font-bold">TAVERNA</div>
                 <div className="text-secondary-text text-sm">RPG STORE</div>

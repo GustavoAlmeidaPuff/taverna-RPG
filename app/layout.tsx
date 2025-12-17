@@ -11,6 +11,9 @@ const cinzel = Cinzel({
 export const metadata: Metadata = {
   title: "Taverna RPG Store - Dados, Miniaturas e Acessórios para RPG",
   description: "Sua loja de RPG favorita! Dados, miniaturas, grids e tudo para suas aventuras épicas.",
+  icons: {
+    icon: '/images/favicon.ico',
+  },
 };
 
 export default function RootLayout({
