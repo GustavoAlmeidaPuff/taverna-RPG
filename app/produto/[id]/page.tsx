@@ -2,28 +2,23 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { ShoppingCart, Heart, Share2, Truck, Shield, RotateCcw, Star } from 'lucide-react';
+import { getProductByHandle } from '@/lib/shopify';
+import { notFound } from 'next/navigation';
 
-// PLACEHOLDER - será substituído por busca dinâmica do Shopify
-export default function ProductDetail({ params }: { params: { id: string } }) {
-  // PLACEHOLDER PRODUCT DATA - será conectado ao Shopify
-  const product = {
-    id: params.id,
-    name: "DRAGÃO ANCESTRAL",
-    rating: 5,
-    reviews: 45,
-    price: 299.90,
-    description: "Uma peça de colecionador impressionante. Este dragão ancestral foi esculpido com detalhes extraordinários, desde cada escama até as asas majestosas. Uma adição épica para qualquer mesa de RPG.",
-    badge: "LANÇAMENTO",
-    // PLACEHOLDER IMAGE - será substituída por imagem real do Shopify
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80",
-    specifications: [
-      "Altura: 15cm | Envergadura: 25cm",
-      "Material: Resina premium pintada à mão",
-      "Edição limitada numerada",
-      "Certificado de autenticidade incluso",
-      "Base temática de rocha vulcânica"
-    ]
-  };
+export default async function ProductDetail({ params }: { params: { id: string } }) {
+  // Buscar produto real do Shopify usando o handle
+  const product = await getProductByHandle(params.id);
+  
+  if (!product) {
+    notFound();
+  }
+  
+  // Se não tiver descrição, usar texto padrão
+  const description = product.description || 'Produto disponível na Taverna RPG.';
+  
+  // Placeholder para avaliações (será conectado ao Firebase futuramente)
+  const rating = 5;
+  const reviews = 0;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -38,10 +33,9 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             {/* Product Image */}
             <div className="relative">
-              {/* PLACEHOLDER IMAGE - será substituída por imagem real do Shopify */}
               <div 
                 className="w-full h-96 bg-cover bg-center rounded-lg"
-                style={{ backgroundImage: `url(${product.image})` }}
+                style={{ backgroundImage: `url(${product.image || '/images/placeholder.png'})` }}
               ></div>
               {product.badge && (
                 <div className="absolute top-4 left-4 bg-primary text-primary-text px-3 py-1 rounded font-bold text-sm">
@@ -52,29 +46,28 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
 
             {/* Product Info */}
             <div>
-              {/* PLACEHOLDER PRODUCT NAME - será conectado ao Shopify */}
               <h1 className="text-4xl font-bold text-text mb-4">{product.name}</h1>
               
-              {/* PLACEHOLDER RATING - será conectado ao Firebase para avaliações reais */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="text-primary w-5 h-5 fill-current" />
-                  ))}
+              {/* Rating - será conectado ao Firebase para avaliações reais futuramente */}
+              {reviews > 0 && (
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className={`w-5 h-5 ${i < rating ? 'text-primary fill-current' : 'text-muted-text'}`} />
+                    ))}
+                  </div>
+                  <span className="text-text">
+                    {rating} ({reviews} avaliações)
+                  </span>
                 </div>
-                <span className="text-text">
-                  {product.rating} ({product.reviews} avaliações)
-                </span>
-              </div>
+              )}
 
-              {/* PLACEHOLDER PRICE - será conectado ao Shopify */}
               <p className="text-primary text-4xl font-bold mb-6">
                 R$ {product.price.toFixed(2).replace('.', ',')}
               </p>
 
-              {/* PLACEHOLDER DESCRIPTION - será conectado ao Shopify */}
               <p className="text-text mb-6 leading-relaxed">
-                {product.description}
+                {description}
               </p>
 
               {/* Quantity and Actions */}
@@ -123,25 +116,20 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
               <button className="pb-4 border-b-2 border-primary text-text font-bold">
                 Detalhes
               </button>
-              {/* PLACEHOLDER REVIEWS COUNT - será conectado ao Firebase */}
-              <button className="pb-4 text-muted-text hover:text-text transition-colors">
-                Avaliações ({product.reviews})
-              </button>
+              {reviews > 0 && (
+                <button className="pb-4 text-muted-text hover:text-text transition-colors">
+                  Avaliações ({reviews})
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Specifications */}
+          {/* Description/Details */}
           <div>
-            <h3 className="text-2xl font-bold text-text mb-4">ESPECIFICAÇÕES DO PRODUTO</h3>
-            {/* PLACEHOLDER SPECIFICATIONS - será conectado ao Shopify */}
-            <ul className="space-y-2">
-              {product.specifications.map((spec, index) => (
-                <li key={index} className="flex items-center gap-2 text-text">
-                  <span className="text-primary">◆</span>
-                  <span>{spec}</span>
-                </li>
-              ))}
-            </ul>
+            <h3 className="text-2xl font-bold text-text mb-4">DETALHES DO PRODUTO</h3>
+            <div className="text-text leading-relaxed whitespace-pre-line">
+              {description}
+            </div>
           </div>
         </div>
       </main>

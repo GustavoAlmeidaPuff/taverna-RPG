@@ -1,11 +1,10 @@
-import { StorefrontClient } from '@shopify/storefront-api-client';
-
-// Configuração do cliente Shopify Storefront API
-const storefrontClient = new StorefrontClient({
-  storeDomain: process.env.SHOPIFY_STORE_DOMAIN!,
-  storefrontAccessToken: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN!,
-  apiVersion: '2024-10',
-});
+// Helper para usar Storefront API (se configurado futuramente)
+// Por enquanto, usando apenas Admin API
+async function useStorefrontAPI(query: string, variables: any) {
+  // Storefront API desabilitado por enquanto - usando apenas Admin API
+  // Para habilitar no futuro, configure SHOPIFY_STOREFRONT_ACCESS_TOKEN
+  return null;
+}
 
 // Helper para fazer requisições à Admin API REST
 async function adminApiRequest(endpoint: string, options: RequestInit = {}) {
@@ -178,25 +177,10 @@ function transformProduct(shopifyProduct: ShopifyProduct): Product {
   };
 }
 
-// Buscar todos os produtos (via Storefront API ou Admin API)
+// Buscar todos os produtos via Admin API
 export async function getAllProducts(limit: number = 20): Promise<Product[]> {
   try {
-    // Tenta usar Storefront API primeiro
-    if (process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN) {
-      const response = await storefrontClient.request(PRODUCTS_QUERY, {
-        variables: { first: limit },
-      });
-
-      if (!response.data?.products?.edges) {
-        return [];
-      }
-
-      return response.data.products.edges.map((edge: { node: ShopifyProduct }) =>
-        transformProduct(edge.node)
-      );
-    }
-    
-    // Se não tiver Storefront token, usa Admin API
+    // Usa Admin API para buscar produtos
     const data = await adminApiRequest(`products.json?limit=${limit}`);
     
     const products = data.products || [];
@@ -215,24 +199,10 @@ export async function getAllProducts(limit: number = 20): Promise<Product[]> {
   }
 }
 
-// Buscar um produto específico por handle
+// Buscar um produto específico por handle via Admin API
 export async function getProductByHandle(handle: string): Promise<Product | null> {
   try {
-    // Tenta usar Storefront API primeiro
-    if (process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN) {
-      const response = await storefrontClient.request(PRODUCT_QUERY, {
-        variables: { handle },
-      });
-
-      if (!response.data?.product) {
-        return null;
-      }
-
-      return transformProduct(response.data.product);
-    }
-    
-    // Se não tiver Storefront token, usa Admin API
-    // Admin API não aceita handle diretamente, precisa buscar por handle
+    // Admin API busca produtos por handle usando query string
     const data = await adminApiRequest(`products.json?handle=${handle}`);
     
     const product = data.products?.[0];

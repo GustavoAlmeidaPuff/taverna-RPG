@@ -1,17 +1,6 @@
 import Link from 'next/link';
 import { Heart, ShoppingCart } from 'lucide-react';
-
-interface Product {
-  id: number;
-  name: string;
-  // PLACEHOLDER PRICE - será conectado ao Shopify
-  price: number;
-  originalPrice?: number;
-  discount?: number;
-  badge?: 'oferta' | 'novo' | 'lançamento';
-  // PLACEHOLDER IMAGE - será substituída por imagem real do Shopify
-  image: string;
-}
+import { Product } from '@/lib/shopify';
 
 interface ProductsProps {
   title: string;
@@ -40,8 +29,13 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
+        {products.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-text">Nenhum produto encontrado.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.map((product) => (
             <div key={product.id} className="bg-card rounded-lg overflow-hidden relative group">
               {/* Badge */}
               {product.badge && (
@@ -62,10 +56,10 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
                 </div>
               )}
 
-              {/* PLACEHOLDER IMAGE - será substituída por imagem real do Shopify */}
+              {/* Imagem do produto do Shopify */}
               <div 
                 className="h-64 bg-cover bg-center relative group"
-                style={{ backgroundImage: `url(${product.image})` }}
+                style={{ backgroundImage: `url(${product.image || '/images/placeholder.png'})` }}
               >
                 {/* Action Buttons - aparecem no hover */}
                 <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -81,7 +75,7 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
 
               <div className="p-4">
                 {/* PLACEHOLDER PRODUCT NAME - será conectado ao Shopify */}
-                <Link href={`/produto/${product.id}`}>
+                <Link href={`/produto/${product.handle}`}>
                   <h3 className="text-card-text font-bold mb-2 hover:text-primary transition-colors">{product.name}</h3>
                 </Link>
                 
@@ -103,7 +97,8 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </section>
   );
