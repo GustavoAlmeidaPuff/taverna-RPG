@@ -108,3 +108,4 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
     </section>
   );
 }
+

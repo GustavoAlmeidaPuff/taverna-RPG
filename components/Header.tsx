@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Search, User, X, Gift, Trash2 } from 'lucide-react';
+import { Search, User, X, Gift, Trash2, Icon } from 'lucide-react';
+import { chest } from '@lucide/lab';
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -37,6 +38,9 @@ export default function Header() {
                 type="text"
                 placeholder="O que você procura, aventureiro?"
                 className="w-full bg-input border border-border rounded-lg py-2 pl-10 pr-4 text-secondary-text placeholder-muted-text focus:outline-none focus:ring-2 focus:ring-focus-ring"
+                style={{
+                  fontFamily: "'Cinzel', serif"
+                }}
               />
             </div>
           </div>
@@ -51,26 +55,7 @@ export default function Header() {
               onClick={() => setIsCartOpen(true)}
               className="relative text-secondary-text hover:text-primary transition-colors"
             >
-              <svg 
-                className="w-6 h-6" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              >
-                {/* Baú - parte inferior */}
-                <rect x="3" y="12" width="18" height="8" rx="1"/>
-                {/* Baú - parte superior (tampa aberta) */}
-                <path d="M3 12L12 6l9 6"/>
-                <path d="M12 6v6"/>
-                {/* Fechadura */}
-                <circle cx="12" cy="16" r="1.5"/>
-                {/* Reforços laterais */}
-                <line x1="6" y1="12" x2="6" y2="20"/>
-                <line x1="18" y1="12" x2="18" y2="20"/>
-              </svg>
+              <Icon iconNode={chest} className="w-6 h-6" />
               <span className="absolute -top-2 -right-2 bg-primary text-primary-text text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 1
               </span>
@@ -199,3 +184,4 @@ export default function Header() {
     </>
   );
 }
+

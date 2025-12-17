@@ -1,4 +1,4 @@
-import { Truck, Shield, CreditCard, Phone } from 'lucide-react';
+import { Truck, Shield, Phone } from 'lucide-react';
 
 export default function Features() {
   const features = [
@@ -13,11 +13,6 @@ export default function Features() {
       description: "Dados protegidos"
     },
     {
-      icon: CreditCard,
-      title: "Parcele em 12x",
-      description: "Sem juros"
-    },
-    {
       icon: Phone,
       title: "Atendimento",
       description: "Via WhatsApp"
@@ -27,7 +22,7 @@ export default function Features() {
   return (
     <section className="bg-background py-12">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
@@ -45,3 +40,4 @@ export default function Features() {
     </section>
   );
 }
+
