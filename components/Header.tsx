@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Search, User, ShoppingCart, X, Gift, Trash2 } from 'lucide-react';
+import { Search, User, X, Gift, Trash2 } from 'lucide-react';
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -51,7 +51,26 @@ export default function Header() {
               onClick={() => setIsCartOpen(true)}
               className="relative text-secondary-text hover:text-primary transition-colors"
             >
-              <ShoppingCart className="w-6 h-6" />
+              <svg 
+                className="w-6 h-6" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                {/* Baú - parte inferior */}
+                <rect x="3" y="12" width="18" height="8" rx="1"/>
+                {/* Baú - parte superior (tampa aberta) */}
+                <path d="M3 12L12 6l9 6"/>
+                <path d="M12 6v6"/>
+                {/* Fechadura */}
+                <circle cx="12" cy="16" r="1.5"/>
+                {/* Reforços laterais */}
+                <line x1="6" y1="12" x2="6" y2="20"/>
+                <line x1="18" y1="12" x2="18" y2="20"/>
+              </svg>
               <span className="absolute -top-2 -right-2 bg-primary text-primary-text text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 1
               </span>
@@ -61,7 +80,7 @@ export default function Header() {
         </div>
 
         {/* Navigation Bar - Marrom escuro (Secondary) */}
-        <nav className="bg-secondary border-t border-border">
+        <nav className="bg-secondary border-t border-border hidden md:block">
           <div className="container mx-auto px-4">
             <ul className="flex items-center justify-center gap-8 py-3">
               <li>
