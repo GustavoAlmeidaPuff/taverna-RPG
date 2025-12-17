@@ -15,6 +15,7 @@ interface ProductsProps {
 export default function Products({ title, subtitle, products }: ProductsProps) {
   const { addItem } = useCart();
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
 
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
@@ -61,12 +62,34 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
             <p className="text-muted-text">Nenhum produto encontrado.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
             {products.map((product) => (
-            <div key={product.id} className="rounded-lg overflow-hidden relative group" style={{ backgroundColor: '#1d1816', border: '1px solid #DFA026' }}>
+            <Link 
+              key={product.id}
+              href={`/produto/${product.handle}`}
+              className="block rounded-lg overflow-hidden relative group cursor-pointer"
+              style={{ 
+                backgroundColor: '#1d1816', 
+                border: '0.5px solid #DFA026',
+                boxShadow: hoveredCardId === product.id 
+                  ? '0 0 12px rgba(223, 160, 38, 0.3)' 
+                  : '0 0 8px rgba(223, 160, 38, 0.2)',
+                transition: 'box-shadow 0.3s ease'
+              }}
+              onMouseEnter={() => {
+                setHoveredCardId(product.id);
+                if (product.images && product.images.length > 1) {
+                  setHoveredProductId(product.id);
+                }
+              }}
+              onMouseLeave={() => {
+                setHoveredCardId(null);
+                setHoveredProductId(null);
+              }}
+            >
               {/* Badge */}
               {product.badge && (
-                <div className={`absolute top-2 left-2 z-10 px-2 py-1 rounded text-xs font-bold ${
+                <div className={`absolute top-1 left-1 md:top-2 md:left-2 z-10 px-1 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs font-bold ${
                   product.badge === 'oferta' || product.discount
                     ? 'bg-destructive text-destructive-text'
                     : 'bg-primary text-primary-text'
@@ -78,16 +101,14 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
                 </div>
               )}
               {!product.badge && product.discount && (
-                <div className="absolute top-2 right-2 z-10 px-2 py-1 rounded text-xs font-bold bg-destructive text-destructive-text">
+                <div className="absolute top-1 right-1 md:top-2 md:right-2 z-10 px-1 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs font-bold bg-destructive text-destructive-text">
                   -{product.discount}%
                 </div>
               )}
 
               {/* Imagem do produto do Shopify com fade */}
               <div 
-                className="h-64 relative group overflow-hidden"
-                onMouseEnter={() => product.images && product.images.length > 1 && setHoveredProductId(product.id)}
-                onMouseLeave={() => setHoveredProductId(null)}
+                className="h-32 md:h-64 relative group overflow-hidden"
               >
                 {/* Imagem principal - sempre visível */}
                 <div 
@@ -106,43 +127,48 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
                 )}
 
                 {/* Action Buttons - aparecem no hover */}
-                <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                  <button className="w-10 h-10 bg-card border border-border rounded-full flex items-center justify-center hover:bg-primary hover:border-primary transition-colors">
-                    <Heart className="text-card-text w-5 h-5" />
+                <div className="absolute bottom-1 right-1 md:bottom-2 md:right-2 flex gap-1 md:gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    className="hidden md:flex w-8 h-8 md:w-10 md:h-10 bg-card border border-border rounded-full items-center justify-center hover:bg-primary hover:border-primary transition-colors"
+                  >
+                    <Heart className="text-card-text w-4 h-4 md:w-5 md:h-5" />
                   </button>
                   <button 
                     onClick={(e) => handleAddToCart(e, product)}
-                    className="bg-primary text-primary-text px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 hover:opacity-90 transition-opacity"
+                    className="bg-primary text-primary-text px-2 py-1 md:px-4 md:py-2 rounded-full text-[10px] md:text-sm font-bold flex items-center gap-0.5 md:gap-1 hover:opacity-90 transition-opacity"
                   >
-                    <ShoppingCart className="w-4 h-4" />
-                    <span>Adicionar ao Baú</span>
+                    <ShoppingCart className="w-3 h-3 md:w-4 md:h-4" />
+                    <span className="hidden md:inline">Adicionar ao Baú</span>
+                    <span className="md:hidden">Baú</span>
                   </button>
                 </div>
               </div>
 
-              <div className="p-4">
+              <div className="p-2 md:p-4">
                 {/* PLACEHOLDER PRODUCT NAME - será conectado ao Shopify */}
-                <Link href={`/produto/${product.handle}`}>
-                  <h3 className="text-card-text font-bold mb-2 hover:text-primary transition-colors uppercase">{product.name}</h3>
-                </Link>
+                <h3 className="text-card-text font-bold mb-1 md:mb-2 hover:text-primary transition-colors uppercase text-xs md:text-base leading-tight md:leading-normal line-clamp-2">{product.name}</h3>
                 
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex flex-col md:flex-row md:items-center gap-0.5 md:gap-2 mb-0.5 md:mb-1">
                   {product.originalPrice && (
-                    <span className="text-muted-text line-through text-sm">
+                    <span className="text-muted-text line-through text-[10px] md:text-sm">
                       de R$ {product.originalPrice.toFixed(2).replace('.', ',')}
                     </span>
                   )}
                   {/* PLACEHOLDER PRICE - será conectado ao Shopify */}
-                  <span className="text-primary font-bold text-lg">
+                  <span className="text-primary font-bold text-sm md:text-lg">
                     R$ {product.price.toFixed(2).replace('.', ',')}
                   </span>
                 </div>
                 {/* PLACEHOLDER INSTALLMENT - será calculado dinamicamente */}
-                <p className="text-muted-text text-sm">
+                <p className="text-muted-text text-[10px] md:text-sm">
                   ou 12x de R$ {(product.price / 12).toFixed(2).replace('.', ',')} sem juros
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
           </div>
         )}

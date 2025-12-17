@@ -19,7 +19,7 @@ export default async function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
-        <Categories />
+        {/* <Categories /> */}
         <Products 
           title="ACABARAM DE CHEGAR"
           subtitle="Os mais novos tesouros da taverna"
