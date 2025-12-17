@@ -70,11 +70,13 @@ export default function Hero() {
               EXPLORAR PRODUTOS
             </button>
             <button 
-              className="px-8 py-3 rounded-lg font-bold transition-colors"
+              className="px-8 py-3 rounded-lg font-bold transition-colors uppercase"
               style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                color: '#DFA026',
-                border: '1px solid #DFA026'
+                backgroundColor: '#221A16',
+                color: '#DF9F26',
+                border: '1px solid #DF9F26',
+                fontFamily: "'Garamond', 'Palatino Linotype', 'Palatino', 'Times New Roman', serif",
+                letterSpacing: '0.03em'
               }}
             >
               NOVIDADES
