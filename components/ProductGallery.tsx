@@ -19,11 +19,6 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
   const allImages = images && images.length > 0 ? images : ['/images/placeholder.png'];
   const currentImage = allImages[selectedIndex];
 
-  // Debug - remover depois
-  console.log('ProductGallery - allImages:', allImages);
-  console.log('ProductGallery - currentImage:', currentImage);
-  console.log('ProductGallery - selectedIndex:', selectedIndex);
-
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isZoomed) return;
     
@@ -66,106 +61,98 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 w-full">
-      {/* Miniaturas Verticais (apenas se tiver mais de uma imagem) - Desktop */}
-      {allImages.length > 1 && (
-        <div className="hidden lg:flex flex-col gap-2 flex-shrink-0">
-          <div className="overflow-y-auto max-h-[500px] pr-1 scrollbar-hide">
-            {allImages.map((image, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedIndex(index)}
-                className={`flex-shrink-0 w-16 h-16 xl:w-20 xl:h-20 rounded-lg overflow-hidden border-2 transition-all mb-2 ${
-                  selectedIndex === index
-                    ? 'border-primary ring-2 ring-primary/50'
-                    : 'border-border hover:border-primary/50 opacity-75 hover:opacity-100'
-                }`}
-                aria-label={`Ver imagem ${index + 1} de ${allImages.length}`}
-              >
-                <img
-                  src={image}
-                  alt={`${productName} - Imagem ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </button>
-            ))}
+    <div className="w-full">
+      <div className="flex flex-col lg:flex-row gap-4">
+        {/* Miniaturas Verticais (Desktop) */}
+        {allImages.length > 1 && (
+          <div className="order-2 lg:order-1 hidden lg:block flex-shrink-0">
+            <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto scrollbar-hide">
+              {allImages.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedIndex(index)}
+                  className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                    selectedIndex === index
+                      ? 'border-primary ring-2 ring-primary/50'
+                      : 'border-border hover:border-primary/50 opacity-75 hover:opacity-100'
+                  }`}
+                  aria-label={`Ver imagem ${index + 1} de ${allImages.length}`}
+                >
+                  <img
+                    src={image}
+                    alt={`${productName} - Miniatura ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Imagem Principal com Zoom */}
-      <div className="flex-1 w-full min-w-0" style={{ backgroundColor: '#1a1612' }}>
-        <div
-          className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] rounded-lg overflow-hidden cursor-zoom-in touch-none"
-          style={{ backgroundColor: '#2a2420', border: '2px solid #d4af37' }}
-          onMouseEnter={() => setIsZoomed(true)}
-          onMouseLeave={() => {
-            setIsZoomed(false);
-            setMousePosition({ x: 50, y: 50 });
-          }}
-          onMouseMove={handleMouseMove}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          {currentImage && (
+        {/* Imagem Principal */}
+        <div className="order-1 lg:order-2 flex-1">
+          <div
+            className="relative w-full h-[300px] sm:h-[400px] lg:h-[500px] rounded-lg overflow-hidden bg-card cursor-zoom-in"
+            onMouseEnter={() => setIsZoomed(true)}
+            onMouseLeave={() => {
+              setIsZoomed(false);
+              setMousePosition({ x: 50, y: 50 });
+            }}
+            onMouseMove={handleMouseMove}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <img
               src={currentImage}
               alt={productName}
-              className="block w-full h-full object-contain"
+              className="w-full h-full object-cover"
               style={{
                 transform: isZoomed 
                   ? `scale(2.5) translate(${(50 - mousePosition.x) * 0.4}%, ${(50 - mousePosition.y) * 0.4}%)` 
                   : 'scale(1)',
                 transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
                 transition: isZoomed ? 'none' : 'transform 0.3s ease-out',
-                display: 'block',
               }}
-              onError={(e) => {
-                console.error('Erro ao carregar imagem:', currentImage);
-                e.currentTarget.style.display = 'none';
-              }}
-              onLoad={() => console.log('Imagem carregada com sucesso:', currentImage)}
             />
-          )}
-          
-          {/* Badge */}
-          {badge && (
-            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-primary text-primary-text px-2 py-1 sm:px-3 sm:py-1 rounded font-bold text-xs sm:text-sm z-10">
-              {badge === 'oferta' ? 'OFERTA' : 
-               badge === 'novo' ? 'NOVO' : 
-               'LANÇAMENTO'}
+            
+            {/* Badge */}
+            {badge && (
+              <div className="absolute top-4 left-4 bg-primary text-primary-text px-3 py-1 rounded font-bold text-sm z-10">
+                {badge === 'oferta' ? 'OFERTA' : 
+                 badge === 'novo' ? 'NOVO' : 
+                 'LANÇAMENTO'}
+              </div>
+            )}
+          </div>
+
+          {/* Miniaturas Horizontais (Mobile) */}
+          {allImages.length > 1 && (
+            <div className="mt-4 lg:hidden flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+              {allImages.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedIndex(index)}
+                  className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                    selectedIndex === index
+                      ? 'border-primary ring-2 ring-primary/50'
+                      : 'border-border hover:border-primary/50 opacity-75 hover:opacity-100'
+                  }`}
+                  aria-label={`Ver imagem ${index + 1} de ${allImages.length}`}
+                >
+                  <img
+                    src={image}
+                    alt={`${productName} - Miniatura ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </button>
+              ))}
             </div>
           )}
         </div>
-
-        {/* Miniaturas Horizontais (Mobile e Tablet) */}
-        {allImages.length > 1 && (
-          <div className="mt-3 lg:hidden flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {allImages.map((image, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedIndex(index)}
-                className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                  selectedIndex === index
-                    ? 'border-primary ring-2 ring-primary/50 scale-105'
-                    : 'border-border hover:border-primary/50 opacity-75 hover:opacity-100'
-                }`}
-                aria-label={`Ver imagem ${index + 1} de ${allImages.length}`}
-              >
-                <img
-                  src={image}
-                  alt={`${productName} - Imagem ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
 }
-
