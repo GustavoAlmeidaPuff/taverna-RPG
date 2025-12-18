@@ -17,7 +17,7 @@ export default function ProductDescription({ description, className = '' }: Prod
   return (
     <div className={className}>
       <div 
-        className={`text-text leading-relaxed prose prose-invert max-w-none transition-all ${
+        className={`text-text leading-relaxed prose prose-invert max-w-none ${
           !isExpanded ? 'line-clamp-4' : ''
         }`}
         dangerouslySetInnerHTML={{ __html: description }}
@@ -27,7 +27,7 @@ export default function ProductDescription({ description, className = '' }: Prod
       />
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="mt-2 text-primary hover:underline font-semibold text-sm"
+        className="mt-2 text-primary hover:underline font-semibold text-sm cursor-pointer"
         style={{
           fontFamily: "'Garamond', 'Palatino Linotype', 'Palatino', 'Times New Roman', serif"
         }}
