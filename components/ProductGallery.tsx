@@ -28,10 +28,18 @@ export default function ProductGallery({ images, badge, productName, primaryImag
 
   // Resetar índice quando primaryImage mudar
   useEffect(() => {
-    if (primaryImage && displayImages[0] === primaryImage) {
-      setSelectedIndex(0);
+    if (primaryImage) {
+      // Encontrar o índice da primaryImage em displayImages
+      const index = displayImages.findIndex(img => img === primaryImage);
+      if (index !== -1) {
+        setSelectedIndex(index);
+      } else {
+        // Se a primaryImage não está na lista, resetar para 0 
+        // (ela será adicionada ao início do array)
+        setSelectedIndex(0);
+      }
     }
-  }, [primaryImage, displayImages]);
+  }, [primaryImage]); // Remover displayImages das dependências para evitar loops
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isZoomed) return;
@@ -83,19 +91,21 @@ export default function ProductGallery({ images, badge, productName, primaryImag
             <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto scrollbar-hide">
               {displayImages.map((image, index) => (
                 <button
-                  key={index}
+                  key={`desktop-thumb-${index}`}
                   onClick={() => setSelectedIndex(index)}
-                  className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                  type="button"
+                  className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
                     selectedIndex === index
                       ? 'border-primary ring-2 ring-primary/50'
                       : 'border-border hover:border-primary/50 opacity-75 hover:opacity-100'
                   }`}
                   aria-label={`Ver imagem ${index + 1} de ${displayImages.length}`}
+                  aria-pressed={selectedIndex === index}
                 >
                   <img
                     src={image}
                     alt={`${productName} - Miniatura ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover pointer-events-none"
                     loading="lazy"
                   />
                 </button>
@@ -146,19 +156,21 @@ export default function ProductGallery({ images, badge, productName, primaryImag
             <div className="mt-4 lg:hidden flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {displayImages.map((image, index) => (
                 <button
-                  key={index}
+                  key={`mobile-thumb-${index}`}
                   onClick={() => setSelectedIndex(index)}
-                  className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                  type="button"
+                  className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all touch-manipulation cursor-pointer ${
                     selectedIndex === index
                       ? 'border-primary ring-2 ring-primary/50'
-                      : 'border-border hover:border-primary/50 opacity-75 hover:opacity-100'
+                      : 'border-border active:border-primary opacity-75 active:opacity-100'
                   }`}
                   aria-label={`Ver imagem ${index + 1} de ${displayImages.length}`}
+                  aria-pressed={selectedIndex === index}
                 >
                   <img
                     src={image}
                     alt={`${productName} - Miniatura ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover pointer-events-none"
                     loading="lazy"
                   />
                 </button>
