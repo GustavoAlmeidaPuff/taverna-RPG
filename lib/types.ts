@@ -8,6 +8,7 @@ export interface Product {
   discount?: number;
   badge?: 'novo' | 'oferta' | 'lançamento';
   image: string;
+  images?: string[];
   description?: string;
   handle: string;
 }

@@ -5,6 +5,7 @@ import { Truck, Shield, RotateCcw, Star } from 'lucide-react';
 import { getProductByHandle } from '@/lib/shopify';
 import { notFound } from 'next/navigation';
 import ProductActions from '@/components/ProductActions';
+import ProductGallery from '@/components/ProductGallery';
 
 export default async function ProductDetail({ params }: { params: { id: string } }) {
   // Buscar produto real do Shopify usando o handle
@@ -32,18 +33,12 @@ export default async function ProductDetail({ params }: { params: { id: string }
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {/* Product Image */}
-            <div className="relative">
-              <div 
-                className="w-full h-96 bg-cover bg-center rounded-lg"
-                style={{ backgroundImage: `url(${product.image || '/images/placeholder.png'})` }}
-              ></div>
-              {product.badge && (
-                <div className="absolute top-4 left-4 bg-primary text-primary-text px-3 py-1 rounded font-bold text-sm">
-                  {product.badge}
-                </div>
-              )}
-            </div>
+            {/* Product Gallery */}
+            <ProductGallery 
+              images={product.images && product.images.length > 0 ? product.images : [product.image || '/images/placeholder.png']}
+              badge={product.badge}
+              productName={product.name}
+            />
 
             {/* Product Info */}
             <div>
