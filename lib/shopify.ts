@@ -171,6 +171,7 @@ const PRODUCT_QUERY = `
       title
       handle
       description
+      tags
       priceRange {
         minVariantPrice {
           amount
@@ -181,7 +182,7 @@ const PRODUCT_QUERY = `
           currencyCode
         }
       }
-      images(first: 5) {
+      images(first: 10) {
         edges {
           node {
             url
@@ -189,7 +190,7 @@ const PRODUCT_QUERY = `
           }
         }
       }
-      variants(first: 10) {
+      variants(first: 100) {
         edges {
           node {
             id
@@ -199,6 +200,10 @@ const PRODUCT_QUERY = `
               currencyCode
             }
             availableForSale
+            image {
+              url
+              altText
+            }
           }
         }
       }
@@ -221,27 +226,75 @@ function transformProduct(shopifyProduct: ShopifyProduct): Product {
   };
 }
 
-// Buscar todos os produtos via Admin API
+// Query GraphQL para buscar produtos pela Storefront API
+const STOREFRONT_PRODUCTS_QUERY = `
+  query getProducts($first: Int!) {
+    products(first: $first) {
+      edges {
+        node {
+          id
+          title
+          handle
+          description
+          tags
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+          images(first: 5) {
+            edges {
+              node {
+                url
+                altText
+              }
+            }
+          }
+          variants(first: 1) {
+            edges {
+              node {
+                id
+                title
+                price {
+                  amount
+                  currencyCode
+                }
+                availableForSale
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+// Buscar todos os produtos via Storefront API (para ter IDs compatíveis com checkout)
 export async function getAllProducts(limit: number = 20): Promise<Product[]> {
   try {
-    // Usa Admin API para buscar produtos
-    const data = await adminApiRequest(`products.json?limit=${limit}`);
+    // Usa Storefront API para garantir IDs compatíveis
+    const data = await storefrontApiRequest(STOREFRONT_PRODUCTS_QUERY, {
+      first: limit,
+    });
     
-    const products = data.products || [];
-    return products.map((p: any) => {
-      const allImages = (p.images || []).map((img: any) => img.src).filter(Boolean);
-      const variant = p.variants?.[0];
+    const products = data.products?.edges || [];
+    return products.map((edge: any) => {
+      const p = edge.node;
+      const allImages = (p.images?.edges || []).map((img: any) => img.node.url).filter(Boolean);
+      const variant = p.variants?.edges?.[0]?.node;
+      
       return {
-        id: p.id.toString(),
+        id: p.id.split('/').pop() || p.id,
         name: p.title,
-        price: parseFloat(variant?.price || '0'),
+        price: parseFloat(variant?.price?.amount || '0'),
         image: allImages[0] || '',
-        images: allImages.length > 1 ? allImages : undefined, // Só inclui se tiver mais de uma imagem
-        description: p.body_html || '',
+        images: allImages.length > 1 ? allImages : undefined,
+        description: p.description || '',
         handle: p.handle,
-        variantId: variant?.id?.toString(), // ID da variante para checkout
-        shopifyProductId: `gid://shopify/Product/${p.id}`, // ID no formato GraphQL
-        tags: p.tags || '', // Tags do produto
+        variantId: variant?.id, // ID da variante no formato GID correto
+        shopifyProductId: p.id,
+        tags: p.tags?.join(', ') || '',
       };
     });
   } catch (error) {
@@ -251,65 +304,46 @@ export async function getAllProducts(limit: number = 20): Promise<Product[]> {
   }
 }
 
-// Buscar um produto específico por handle via Admin API
+// Buscar um produto específico por handle via Storefront API
 export async function getProductByHandle(handle: string): Promise<Product | null> {
   try {
-    // Admin API busca produtos por handle usando query string
-    const data = await adminApiRequest(`products.json?handle=${handle}`);
+    // Usa Storefront API para garantir IDs compatíveis com checkout
+    const data = await storefrontApiRequest(PRODUCT_QUERY, {
+      handle: handle,
+    });
     
-    const product = data.products?.[0];
+    const product = data.product;
     if (!product) return null;
     
-    const allImages = (product.images || []).map((img: any) => img.src).filter(Boolean);
-    const firstVariant = product.variants?.[0];
+    const allImages = (product.images?.edges || []).map((img: any) => img.node.url).filter(Boolean);
+    const firstVariant = product.variants?.edges?.[0]?.node;
     
     // Processar todas as variantes
-    const variants: ProductVariant[] = (product.variants || []).map((variant: any, index: number) => {
-      // Buscar imagem associada à variante
-      // Na Admin API, podemos tentar associar imagens por posição ou usar metafields
-      // Por enquanto, vamos usar uma estratégia simples: se houver múltiplas imagens,
-      // associar por índice (se o número de imagens corresponder ao número de variantes)
-      let variantImage: string | undefined;
-      
-      // Se houver image_id na variante (alguns apps/extensões podem adicionar isso)
-      if (variant.image_id) {
-        const variantImageObj = product.images?.find((img: any) => img.id === variant.image_id);
-        variantImage = variantImageObj?.src;
-      }
-      
-      // Se não encontrou por image_id, tentar associar por posição
-      // (assumindo que a primeira imagem corresponde à primeira variante, etc.)
-      if (!variantImage && allImages.length > 1 && index < allImages.length) {
-        variantImage = allImages[index];
-      }
-      
-      // Se ainda não tiver imagem específica, usar a primeira imagem do produto
-      if (!variantImage && allImages.length > 0) {
-        variantImage = allImages[0];
-      }
+    const variants: ProductVariant[] = (product.variants?.edges || []).map((edge: any) => {
+      const variant = edge.node;
       
       return {
-        id: variant.id.toString(),
+        id: variant.id,
         title: variant.title || 'Padrão',
-        price: parseFloat(variant.price || '0'),
-        available: variant.available !== false && (variant.inventory_quantity > 0 || variant.inventory_policy === 'continue' || variant.inventory_management === null),
-        image: variantImage,
-        variantId: variant.id.toString(),
+        price: parseFloat(variant.price?.amount || '0'),
+        available: variant.availableForSale,
+        image: variant.image?.url || allImages[0],
+        variantId: variant.id, // ID no formato GID correto
       };
     });
     
     return {
-      id: product.id.toString(),
+      id: product.id.split('/').pop() || product.id,
       name: product.title,
-      price: parseFloat(firstVariant?.price || '0'),
+      price: parseFloat(firstVariant?.price?.amount || '0'),
       image: allImages[0] || '',
-      images: allImages.length > 1 ? allImages : undefined, // Só inclui se tiver mais de uma imagem
-      description: product.body_html || '',
+      images: allImages.length > 1 ? allImages : undefined,
+      description: product.description || '',
       handle: product.handle,
-      variantId: firstVariant?.id?.toString(), // ID da primeira variante para compatibilidade
-      shopifyProductId: `gid://shopify/Product/${product.id}`, // ID no formato GraphQL
-      tags: product.tags || '', // Tags do produto
-      variants: variants.length > 1 ? variants : undefined, // Só inclui se tiver mais de uma variante
+      variantId: firstVariant?.id, // ID da primeira variante no formato GID correto
+      shopifyProductId: product.id,
+      tags: product.tags?.join(', ') || '',
+      variants: variants.length > 1 ? variants : undefined,
     };
   } catch (error) {
     console.error('Erro ao buscar produto do Shopify:', error);
@@ -324,53 +358,89 @@ export async function getProductById(id: string): Promise<Product | null> {
   return getProductByHandle(id);
 }
 
-// Buscar múltiplos produtos por IDs (tenta como handle primeiro, depois como ID numérico)
+// Query GraphQL para buscar múltiplos produtos por IDs
+const PRODUCTS_BY_IDS_QUERY = `
+  query getProductsByIds($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on Product {
+        id
+        title
+        handle
+        description
+        tags
+        priceRange {
+          minVariantPrice {
+            amount
+            currencyCode
+          }
+        }
+        images(first: 5) {
+          edges {
+            node {
+              url
+              altText
+            }
+          }
+        }
+        variants(first: 1) {
+          edges {
+            node {
+              id
+              title
+              price {
+                amount
+                currencyCode
+              }
+              availableForSale
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+// Buscar múltiplos produtos por IDs usando Storefront API
 export async function getProductsByIds(ids: string[]): Promise<Product[]> {
   if (ids.length === 0) return [];
   
-  const products: Product[] = [];
-  
-  // Buscar produtos em paralelo
-  const promises = ids.map(async (id) => {
-    try {
-      // Primeiro tenta como handle
-      let product = await getProductByHandle(id);
-      
-      // Se não encontrou, tenta como ID numérico via Admin API
-      if (!product) {
-        try {
-          const data = await adminApiRequest(`products/${id}.json`);
-          const p = data.product;
-          if (p) {
-            const allImages = (p.images || []).map((img: any) => img.src).filter(Boolean);
-            const variant = p.variants?.[0];
-            product = {
-              id: p.id.toString(),
-              name: p.title,
-              price: parseFloat(variant?.price || '0'),
-              image: allImages[0] || '',
-              images: allImages.length > 1 ? allImages : undefined,
-              description: p.body_html || '',
-              handle: p.handle,
-              variantId: variant?.id?.toString(),
-              shopifyProductId: `gid://shopify/Product/${p.id}`,
-              tags: p.tags || '',
-            };
-          }
-        } catch (error) {
-          console.error(`Erro ao buscar produto por ID ${id}:`, error);
-        }
+  try {
+    // Converter IDs para formato GID se necessário
+    const formattedIds = ids.map(id => {
+      if (id.startsWith('gid://')) {
+        return id;
       }
-      
-      return product;
-    } catch (error) {
-      console.error(`Erro ao buscar produto ${id}:`, error);
-      return null;
-    }
-  });
-  
-  const results = await Promise.all(promises);
-  return results.filter((p): p is Product => p !== null);
+      return `gid://shopify/Product/${id}`;
+    });
+
+    const data = await storefrontApiRequest(PRODUCTS_BY_IDS_QUERY, {
+      ids: formattedIds,
+    });
+
+    const nodes = data.nodes || [];
+    return nodes
+      .filter((node: any) => node !== null) // Filtrar IDs que não existem
+      .map((p: any) => {
+        const allImages = (p.images?.edges || []).map((img: any) => img.node.url).filter(Boolean);
+        const variant = p.variants?.edges?.[0]?.node;
+        
+        return {
+          id: p.id.split('/').pop() || p.id,
+          name: p.title,
+          price: parseFloat(variant?.price?.amount || '0'),
+          image: allImages[0] || '',
+          images: allImages.length > 1 ? allImages : undefined,
+          description: p.description || '',
+          handle: p.handle,
+          variantId: variant?.id, // ID no formato GID correto
+          shopifyProductId: p.id,
+          tags: p.tags?.join(', ') || '',
+        };
+      });
+  } catch (error) {
+    console.error('Erro ao buscar produtos por IDs:', error);
+    return [];
+  }
 }
 
 // Interface para itens do checkout
@@ -419,14 +489,64 @@ const CREATE_CART_MUTATION = `
   }
 `;
 
+// Query para validar variantes antes de criar o carrinho
+const VALIDATE_VARIANTS_QUERY = `
+  query validateVariants($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on ProductVariant {
+        id
+        availableForSale
+        product {
+          id
+          title
+        }
+      }
+    }
+  }
+`;
+
+// Validar variantes antes de criar checkout
+async function validateVariants(variantIds: string[]): Promise<{ valid: string[], invalid: string[] }> {
+  try {
+    const formattedIds = variantIds.map(id => {
+      if (!id.startsWith('gid://')) {
+        return `gid://shopify/ProductVariant/${id}`;
+      }
+      return id;
+    });
+
+    const data = await storefrontApiRequest(VALIDATE_VARIANTS_QUERY, {
+      ids: formattedIds,
+    });
+
+    const valid: string[] = [];
+    const invalid: string[] = [];
+
+    data.nodes.forEach((node: any, index: number) => {
+      if (node && node.id && node.availableForSale) {
+        valid.push(formattedIds[index]);
+      } else {
+        invalid.push(formattedIds[index]);
+      }
+    });
+
+    return { valid, invalid };
+  } catch (error) {
+    console.error('Erro ao validar variantes:', error);
+    throw error;
+  }
+}
+
 // Criar checkout no Shopify usando Cart API
 export async function createCheckout(lineItems: CheckoutLineItem[]): Promise<CheckoutResponse> {
   try {
-    // Converter variant IDs para o formato GraphQL (gid://shopify/ProductVariant/...)
+    console.log('Criando checkout com itens:', lineItems);
+
+    // Garantir que todos os IDs estejam no formato GID correto
     const formattedLineItems = lineItems.map(item => {
-      // Se o variantId já está no formato gid, usar diretamente
-      // Caso contrário, assumir que é um ID numérico e converter
       let variantId = item.variantId;
+      
+      // Se não estiver no formato GID, converter
       if (!variantId.startsWith('gid://')) {
         variantId = `gid://shopify/ProductVariant/${item.variantId}`;
       }
@@ -434,12 +554,36 @@ export async function createCheckout(lineItems: CheckoutLineItem[]): Promise<Che
       return {
         merchandiseId: variantId,
         quantity: item.quantity,
+        originalId: item.variantId,
       };
     });
 
+    console.log('Itens formatados:', formattedLineItems);
+
+    // Validar variantes antes de criar o carrinho
+    const variantIds = formattedLineItems.map(item => item.merchandiseId);
+    const { valid, invalid } = await validateVariants(variantIds);
+
+    console.log('Validação de variantes - válidas:', valid, 'inválidas:', invalid);
+
+    if (invalid.length > 0) {
+      const invalidProductNames = invalid.map(id => {
+        const item = formattedLineItems.find(i => i.merchandiseId === id);
+        return item?.originalId || id;
+      }).join(', ');
+      
+      throw new Error(
+        `Os seguintes produtos não estão disponíveis no momento: ${invalidProductNames}. ` +
+        `Por favor, remova-os do carrinho e tente novamente.`
+      );
+    }
+
     const data = await storefrontApiRequest(CREATE_CART_MUTATION, {
       input: {
-        lines: formattedLineItems,
+        lines: formattedLineItems.map(item => ({
+          merchandiseId: item.merchandiseId,
+          quantity: item.quantity,
+        })),
       },
     });
 
@@ -455,6 +599,8 @@ export async function createCheckout(lineItems: CheckoutLineItem[]): Promise<Che
     if (!cart || !cart.checkoutUrl) {
       throw new Error('Carrinho criado mas URL de checkout não retornada');
     }
+
+    console.log('Checkout criado com sucesso:', cart.id);
 
     return {
       checkoutUrl: cart.checkoutUrl,

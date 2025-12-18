@@ -9,7 +9,7 @@ import { Trash2, Loader2 } from 'lucide-react';
 import AuthModal from '@/components/AuthModal';
 
 export function CheckoutContent() {
-  const { items, removeItem, updateQuantity, getTotal, loading } = useCart();
+  const { items, removeItem, updateQuantity, getTotal, loading, clearCart } = useCart();
   const { user } = useAuth();
   const router = useRouter();
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -168,7 +168,7 @@ export function CheckoutContent() {
                 // Validar se todos os itens têm variantId
                 const itemsWithoutVariant = items.filter(item => !item.variantId);
                 if (itemsWithoutVariant.length > 0) {
-                  setError('Alguns produtos não têm variante configurada. Por favor, recarregue a página e tente novamente.');
+                  setError('Alguns produtos não têm variante configurada. Por favor, remova esses produtos e tente novamente.');
                   return;
                 }
 
@@ -194,7 +194,16 @@ export function CheckoutContent() {
                   const data = await response.json();
 
                   if (!response.ok) {
-                    throw new Error(data.message || data.error || 'Erro ao processar checkout');
+                    // Se houver produtos inválidos, sugerir limpar o carrinho
+                    if (data.message && data.message.includes('não estão disponíveis')) {
+                      setError(
+                        `${data.message}\n\nSugestão: Limpe seu carrinho e adicione os produtos novamente para garantir que estejam atualizados.`
+                      );
+                    } else {
+                      throw new Error(data.message || data.error || 'Erro ao processar checkout');
+                    }
+                    setIsProcessing(false);
+                    return;
                   }
 
                   // Salvar dados temporários do checkout para associar depois
@@ -244,7 +253,21 @@ export function CheckoutContent() {
 
             {error && (
               <div className="mb-3 p-3 bg-red-900/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
-                {error}
+                <div className="whitespace-pre-line mb-2">{error}</div>
+                {error.includes('não estão disponíveis') && (
+                  <button
+                    onClick={async () => {
+                      if (confirm('Tem certeza que deseja limpar todo o carrinho?')) {
+                        await clearCart();
+                        setError(null);
+                        window.location.reload();
+                      }
+                    }}
+                    className="mt-2 w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+                  >
+                    Limpar Carrinho
+                  </button>
+                )}
               </div>
             )}
 

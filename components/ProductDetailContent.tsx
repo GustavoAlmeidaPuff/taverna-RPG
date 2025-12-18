@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Product } from '@/lib/shopify';
-import { Star, Truck, Shield, RotateCcw } from 'lucide-react';
+import { Star, Shield, RotateCcw } from 'lucide-react';
 import ProductGallery from './ProductGallery';
 import ProductVariantSelector from './ProductVariantSelector';
 
@@ -55,12 +55,7 @@ export default function ProductDetailContent({ product, rating = 5, reviews = 0 
           />
 
           {/* Features */}
-          <div className="grid grid-cols-3 gap-4 mt-6">
-            <div className="bg-card rounded-lg p-4 text-center">
-              <Truck className="text-primary w-8 h-8 mx-auto mb-2" />
-              <p className="text-card-text text-sm font-bold">Frete Grátis</p>
-              <p className="text-muted-text text-xs">acima de R$150</p>
-            </div>
+          <div className="grid grid-cols-2 gap-4 mt-6">
             <div className="bg-card rounded-lg p-4 text-center">
               <Shield className="text-primary w-8 h-8 mx-auto mb-2" />
               <p className="text-card-text text-sm font-bold">Compra Segura</p>
