@@ -459,7 +459,7 @@ export default function Header() {
             <ul className="flex items-center justify-center gap-[3px] py-0">
               <li>
                 <Link 
-                  href="#" 
+                  href="/busca?q=miniatura" 
                   className="nav-menu-item"
                 >
                   <span>⚔️</span>
@@ -468,7 +468,7 @@ export default function Header() {
               </li>
               <li>
                 <Link 
-                  href="#" 
+                  href="/busca?q=dado" 
                   className="nav-menu-item"
                 >
                   <span>🎲</span>
@@ -477,7 +477,7 @@ export default function Header() {
               </li>
               <li>
                 <Link 
-                  href="#" 
+                  href="/busca?q=grid" 
                   className="nav-menu-item"
                 >
                   <span>🗺️</span>
@@ -486,16 +486,7 @@ export default function Header() {
               </li>
               <li>
                 <Link 
-                  href="#" 
-                  className="nav-menu-item"
-                >
-                  <span>🏰</span>
-                  <span>Cenários</span>
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="#" 
+                  href="/busca?q=livro" 
                   className="nav-menu-item"
                 >
                   <span>📖</span>
@@ -504,7 +495,7 @@ export default function Header() {
               </li>
               <li>
                 <Link 
-                  href="#" 
+                  href="/busca?q=acessorio" 
                   className="nav-menu-item"
                 >
                   <span>🎭</span>
@@ -675,7 +666,7 @@ export default function Header() {
                 <ul className="space-y-2">
                   <li>
                     <Link 
-                      href="#" 
+                      href="/busca?q=miniatura" 
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
                     >
@@ -685,7 +676,7 @@ export default function Header() {
                   </li>
                   <li>
                     <Link 
-                      href="#" 
+                      href="/busca?q=dado" 
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
                     >
@@ -695,7 +686,7 @@ export default function Header() {
                   </li>
                   <li>
                     <Link 
-                      href="#" 
+                      href="/busca?q=mapa" 
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
                     >
@@ -705,17 +696,7 @@ export default function Header() {
                   </li>
                   <li>
                     <Link 
-                      href="#" 
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
-                    >
-                      <span className="text-2xl">🏰</span>
-                      <span className="font-medium">CENÁRIOS</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link 
-                      href="#" 
+                      href="/busca?q=livro" 
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
                     >
@@ -725,7 +706,7 @@ export default function Header() {
                   </li>
                   <li>
                     <Link 
-                      href="#" 
+                      href="/busca?q=acessorio" 
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
                     >
