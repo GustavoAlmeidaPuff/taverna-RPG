@@ -63,13 +63,6 @@ export default async function ProductDetail({ params }: { params: { id: string }
                 R$ {product.price.toFixed(2).replace('.', ',')}
               </p>
 
-              {description && (
-                <ProductDescription 
-                  description={description}
-                  className="mb-6"
-                />
-              )}
-
               {/* Quantity and Actions */}
               <ProductActions product={product} />
 
@@ -110,12 +103,8 @@ export default async function ProductDetail({ params }: { params: { id: string }
           <div>
             <h3 className="text-2xl font-bold text-text mb-4">DETALHES DO PRODUTO</h3>
             {description ? (
-              <div 
-                className="text-text leading-relaxed prose prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: description }}
-                style={{
-                  color: '#ebe8e0'
-                }}
+              <ProductDescription 
+                description={description}
               />
             ) : (
               <p className="text-text">Nenhuma descrição disponível para este produto.</p>
