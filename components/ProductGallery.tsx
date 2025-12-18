@@ -107,7 +107,7 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
             <img
               src={currentImage}
               alt={productName}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               style={{
                 transform: isZoomed 
                   ? `scale(2.5) translate(${(50 - mousePosition.x) * 0.4}%, ${(50 - mousePosition.y) * 0.4}%)` 
