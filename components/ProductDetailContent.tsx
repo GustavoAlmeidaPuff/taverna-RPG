@@ -75,3 +75,4 @@ export default function ProductDetailContent({ product, rating = 5, reviews = 0 
     </>
   );
 }
+

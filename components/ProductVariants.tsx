@@ -64,7 +64,7 @@ export default function ProductVariants({
           {variants.length} {variants.length === 1 ? 'variante' : 'variantes'}
         </p>
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {variants.map((variant) => {
           // Comparar IDs como strings para garantir correspondência
           const isSelected = String(selectedId) === String(variant.id);
@@ -138,3 +138,4 @@ export default function ProductVariants({
     </div>
   );
 }
+
