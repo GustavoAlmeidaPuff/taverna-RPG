@@ -10,7 +10,7 @@ import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { getProductsByIds, Product } from '@/lib/shopify';
+import { Product } from '@/lib/shopify';
 import { 
   User, 
   Lock, 
@@ -124,8 +124,22 @@ export default function ContaPage() {
 
     try {
       setLoadingFavorites(true);
-      const products = await getProductsByIds(favoriteIds);
-      setFavoriteProducts(products);
+      
+      // Chamar API route do servidor para buscar produtos
+      const response = await fetch('/api/products/ids', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ids: favoriteIds }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar produtos favoritos');
+      }
+
+      const data = await response.json();
+      setFavoriteProducts(data.products || []);
     } catch (error) {
       console.error('Erro ao carregar produtos favoritos:', error);
       setFavoriteProducts([]);
