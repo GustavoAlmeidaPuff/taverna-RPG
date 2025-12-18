@@ -20,7 +20,7 @@ export default function Hero() {
       ></div>
       
       <div className="container mx-auto pr-4 md:px-4 relative z-10 py-20">
-        <div className="max-w-2xl pl-0 md:pl-12">
+        <div className="max-w-2xl pl-0 md:pl-12 ml-[10px] mr-0">
           {/* Welcome Badge */}
           <div 
             className="inline-flex items-center gap-2 border rounded-lg px-4 py-2 mb-6" 

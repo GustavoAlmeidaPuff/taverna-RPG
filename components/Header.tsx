@@ -11,6 +11,9 @@ import { Product } from '@/lib/shopify';
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCartClosing, setIsCartClosing] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuClosing, setIsMobileMenuClosing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -20,6 +23,23 @@ export default function Header() {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { items, removeItem, updateQuantity, getTotal, getItemCount } = useCart();
+
+  // Funções para fechar com animação
+  const closeCart = () => {
+    setIsCartClosing(true);
+    setTimeout(() => {
+      setIsCartOpen(false);
+      setIsCartClosing(false);
+    }, 300);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuClosing(true);
+    setTimeout(() => {
+      setIsMobileMenuOpen(false);
+      setIsMobileMenuClosing(false);
+    }, 300);
+  };
 
   // Função de busca com debounce
   useEffect(() => {
@@ -102,7 +122,13 @@ export default function Header() {
             {/* Primeira linha - Menu, Logo e Carrinho (Mobile) / Menu, Logo, Search, User, Carrinho (Desktop) */}
             <div className="flex items-center justify-between mb-3 md:mb-0">
               {/* Menu Hamburger - Mobile */}
-              <button className="md:hidden text-secondary-text hover:text-primary transition-colors">
+              <button 
+                onClick={() => {
+                  setIsMobileMenuOpen(true);
+                  setIsMobileMenuClosing(false);
+                }}
+                className="md:hidden text-secondary-text hover:text-primary transition-colors"
+              >
                 <Menu className="w-6 h-6" />
               </button>
 
@@ -226,7 +252,10 @@ export default function Header() {
                   <span>Entrar</span>
                 </button>
                 <button 
-                  onClick={() => setIsCartOpen(true)}
+                  onClick={() => {
+                    setIsCartOpen(true);
+                    setIsCartClosing(false);
+                  }}
                   className="relative text-secondary-text hover:text-primary transition-colors"
                 >
                   <Icon iconNode={chest} className="w-6 h-6" />
@@ -368,8 +397,11 @@ export default function Header() {
       {/* Cart Sidebar - Meu Baú */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50 flex">
-          <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setIsCartOpen(false)}></div>
-          <div className="relative ml-auto w-full max-w-md bg-[#201915] h-full overflow-y-auto border-l border-gray-700">
+          <div 
+            className={`fixed inset-0 bg-black bg-opacity-50 ${isCartClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
+            onClick={closeCart}
+          ></div>
+          <div className={`relative ml-auto w-full max-w-md bg-[#201915] h-full overflow-y-auto border-l border-gray-700 ${isCartClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
             <div className="p-6">
               {/* Cart Header */}
               <div className="flex items-center justify-between mb-6">
@@ -378,7 +410,7 @@ export default function Header() {
                   <h2 className="text-[#e8b430] text-xl font-bold uppercase">MEU BAÚ</h2>
                 </div>
                 <button 
-                  onClick={() => setIsCartOpen(false)}
+                  onClick={closeCart}
                   className="w-8 h-8 rounded-full bg-[#2a1f1a] flex items-center justify-center hover:bg-[#332520] transition-colors"
                 >
                   <X className="w-5 h-5 text-white" />
@@ -474,6 +506,127 @@ export default function Header() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Menu Sidebar */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 animate-fade-in"
+            onClick={() => setIsMobileMenuOpen(false)}
+          ></div>
+          <div className="relative mr-auto w-full max-w-xs bg-[#201915] h-full overflow-y-auto border-r border-[#DFA026] transform transition-transform duration-300 ease-in-out animate-slide-in-left">
+            <div className="p-6">
+              {/* Menu Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <Image 
+                    src="/images/logo.png" 
+                    alt="Taverna RPG Store" 
+                    width={32} 
+                    height={32}
+                    className="object-contain"
+                  />
+                  <h2 
+                    className="text-[#DFA026] text-xl font-bold uppercase"
+                    style={{
+                      fontFamily: 'var(--font-cinzel), serif',
+                      textShadow: '0 0 10px rgba(223, 160, 38, 0.5)'
+                    }}
+                  >
+                    TAVERNA
+                  </h2>
+                </div>
+                <button 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-8 h-8 rounded-full bg-[#2a1f1a] flex items-center justify-center hover:bg-[#332520] transition-colors"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+
+              {/* Menu Categories */}
+              <nav className="mb-6">
+                <ul className="space-y-2">
+                  <li>
+                    <Link 
+                      href="#" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
+                    >
+                      <span className="text-2xl">⚔️</span>
+                      <span className="font-medium">MINIATURAS</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      href="#" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
+                    >
+                      <span className="text-2xl">🎲</span>
+                      <span className="font-medium">DADOS DE RPG</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      href="#" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
+                    >
+                      <span className="text-2xl">🗺️</span>
+                      <span className="font-medium">GRIDS E MAPAS</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      href="#" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
+                    >
+                      <span className="text-2xl">🏰</span>
+                      <span className="font-medium">CENÁRIOS</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      href="#" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
+                    >
+                      <span className="text-2xl">📖</span>
+                      <span className="font-medium">LIVROS</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      href="#" 
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 text-secondary-text hover:text-primary hover:bg-[#2a1f1a] transition-colors px-4 py-3 rounded-lg"
+                    >
+                      <span className="text-2xl">🎭</span>
+                      <span className="font-medium">ACESSÓRIOS</span>
+                    </Link>
+                  </li>
+                </ul>
+              </nav>
+
+              {/* Login/Register Button */}
+              <div className="border-t border-[#DFA026]/20 pt-6">
+                <button 
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    // Aqui você pode adicionar a navegação para a página de login
+                  }}
+                  className="w-full flex items-center justify-center gap-3 bg-[#DFA026] text-[#201915] py-3 rounded-lg font-bold hover:bg-[#E0B64D] transition-colors"
+                >
+                  <User className="w-5 h-5" />
+                  <span>Entrar / Cadastrar</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
