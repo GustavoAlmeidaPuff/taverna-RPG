@@ -13,6 +13,8 @@ export function CheckoutContent() {
   const { user } = useAuth();
   const router = useRouter();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Redirecionar para login se não estiver autenticado ao acessar a página
   useEffect(() => {
@@ -141,18 +143,74 @@ export function CheckoutContent() {
             </div>
 
             <button 
-              onClick={() => {
+              onClick={async () => {
                 if (!user) {
                   setShowAuthModal(true);
                   return;
                 }
-                // Aqui você pode adicionar a lógica de finalizar pedido
-                alert('Pedido finalizado! (Integração com pagamento será implementada)');
+
+                // Validar se todos os itens têm variantId
+                const itemsWithoutVariant = items.filter(item => !item.variantId);
+                if (itemsWithoutVariant.length > 0) {
+                  setError('Alguns produtos não têm variante configurada. Por favor, recarregue a página e tente novamente.');
+                  return;
+                }
+
+                setIsProcessing(true);
+                setError(null);
+
+                try {
+                  // Preparar itens para o checkout
+                  const checkoutItems = items.map(item => ({
+                    variantId: item.variantId!,
+                    quantity: item.quantity,
+                  }));
+
+                  // Chamar API de checkout
+                  const response = await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ items: checkoutItems }),
+                  });
+
+                  const data = await response.json();
+
+                  if (!response.ok) {
+                    throw new Error(data.message || data.error || 'Erro ao processar checkout');
+                  }
+
+                  // Redirecionar para o checkout do Shopify
+                  if (data.checkoutUrl) {
+                    window.location.href = data.checkoutUrl;
+                  } else {
+                    throw new Error('URL de checkout não retornada');
+                  }
+                } catch (err: any) {
+                  console.error('Erro ao processar checkout:', err);
+                  setError(err.message || 'Erro ao processar checkout. Tente novamente.');
+                  setIsProcessing(false);
+                }
               }}
-              className="w-full bg-primary text-primary-text py-3 rounded-lg font-bold hover:opacity-90 transition-opacity mb-3"
+              disabled={isProcessing}
+              className="w-full bg-primary text-primary-text py-3 rounded-lg font-bold hover:opacity-90 transition-opacity mb-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              FINALIZAR PEDIDO
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                'FINALIZAR PEDIDO'
+              )}
             </button>
+
+            {error && (
+              <div className="mb-3 p-3 bg-red-900/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+                {error}
+              </div>
+            )}
 
             <Link 
               href="/"

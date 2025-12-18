@@ -1,9 +1,38 @@
-// Helper para usar Storefront API (se configurado futuramente)
-// Por enquanto, usando apenas Admin API
-async function useStorefrontAPI(query: string, variables: any) {
-  // Storefront API desabilitado por enquanto - usando apenas Admin API
-  // Para habilitar no futuro, configure SHOPIFY_STOREFRONT_ACCESS_TOKEN
-  return null;
+// Helper para fazer requisições à Storefront API
+async function storefrontApiRequest(query: string, variables: any = {}) {
+  const storeDomain = process.env.SHOPIFY_STORE_DOMAIN!;
+  const accessToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN!;
+  
+  if (!accessToken) {
+    throw new Error('SHOPIFY_STOREFRONT_ACCESS_TOKEN não configurado');
+  }
+  
+  const url = `https://${storeDomain}/api/2024-10/graphql.json`;
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'X-Shopify-Storefront-Access-Token': accessToken,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      query,
+      variables,
+    }),
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Shopify Storefront API error: ${response.statusText} - ${errorText}`);
+  }
+  
+  const data = await response.json();
+  
+  if (data.errors) {
+    throw new Error(`Shopify GraphQL errors: ${JSON.stringify(data.errors)}`);
+  }
+  
+  return data.data;
 }
 
 // Helper para fazer requisições à Admin API REST
@@ -75,6 +104,8 @@ export interface Product {
   images?: string[]; // Array de imagens para hover
   description?: string;
   handle: string;
+  variantId?: string; // ID da variante do produto no Shopify (necessário para checkout)
+  shopifyProductId?: string; // ID do produto no Shopify (formato gid://shopify/Product/...)
 }
 
 // Query GraphQL para buscar todos os produtos
@@ -187,14 +218,17 @@ export async function getAllProducts(limit: number = 20): Promise<Product[]> {
     const products = data.products || [];
     return products.map((p: any) => {
       const allImages = (p.images || []).map((img: any) => img.src).filter(Boolean);
+      const variant = p.variants?.[0];
       return {
         id: p.id.toString(),
         name: p.title,
-        price: parseFloat(p.variants[0]?.price || '0'),
+        price: parseFloat(variant?.price || '0'),
         image: allImages[0] || '',
         images: allImages.length > 1 ? allImages : undefined, // Só inclui se tiver mais de uma imagem
         description: p.body_html || '',
         handle: p.handle,
+        variantId: variant?.id?.toString(), // ID da variante para checkout
+        shopifyProductId: `gid://shopify/Product/${p.id}`, // ID no formato GraphQL
       };
     });
   } catch (error) {
@@ -214,14 +248,17 @@ export async function getProductByHandle(handle: string): Promise<Product | null
     if (!product) return null;
     
     const allImages = (product.images || []).map((img: any) => img.src).filter(Boolean);
+    const variant = product.variants?.[0];
     return {
       id: product.id.toString(),
       name: product.title,
-      price: parseFloat(product.variants[0]?.price || '0'),
+      price: parseFloat(variant?.price || '0'),
       image: allImages[0] || '',
       images: allImages.length > 1 ? allImages : undefined, // Só inclui se tiver mais de uma imagem
       description: product.body_html || '',
       handle: product.handle,
+      variantId: variant?.id?.toString(), // ID da variante para checkout
+      shopifyProductId: `gid://shopify/Product/${product.id}`, // ID no formato GraphQL
     };
   } catch (error) {
     console.error('Erro ao buscar produto do Shopify:', error);
@@ -234,4 +271,116 @@ export async function getProductById(id: string): Promise<Product | null> {
   // A Shopify usa handles nas URLs, então podemos tentar usar o ID como handle
   // ou fazer uma query diferente se necessário
   return getProductByHandle(id);
+}
+
+// Interface para itens do checkout
+export interface CheckoutLineItem {
+  variantId: string;
+  quantity: number;
+}
+
+// Interface para resposta do checkout
+export interface CheckoutResponse {
+  checkoutUrl: string;
+  checkoutId: string;
+}
+
+// Mutation GraphQL para criar checkout
+const CREATE_CHECKOUT_MUTATION = `
+  mutation checkoutCreate($input: CheckoutCreateInput!) {
+    checkoutCreate(input: $input) {
+      checkout {
+        id
+        webUrl
+        lineItems(first: 250) {
+          edges {
+            node {
+              id
+              title
+              quantity
+              variant {
+                id
+                title
+                price {
+                  amount
+                  currencyCode
+                }
+              }
+            }
+          }
+        }
+      }
+      checkoutUserErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+// Criar checkout no Shopify
+export async function createCheckout(lineItems: CheckoutLineItem[]): Promise<CheckoutResponse> {
+  try {
+    // Converter variant IDs para o formato GraphQL (gid://shopify/ProductVariant/...)
+    const formattedLineItems = lineItems.map(item => {
+      // Se o variantId já está no formato gid, usar diretamente
+      // Caso contrário, assumir que é um ID numérico e converter
+      let variantId = item.variantId;
+      if (!variantId.startsWith('gid://')) {
+        variantId = `gid://shopify/ProductVariant/${item.variantId}`;
+      }
+      
+      return {
+        variantId,
+        quantity: item.quantity,
+      };
+    });
+
+    const data = await storefrontApiRequest(CREATE_CHECKOUT_MUTATION, {
+      input: {
+        lineItems: formattedLineItems,
+      },
+    });
+
+    if (data.checkoutCreate.checkoutUserErrors?.length > 0) {
+      const errors = data.checkoutCreate.checkoutUserErrors
+        .map((e: any) => `${e.field}: ${e.message}`)
+        .join(', ');
+      throw new Error(`Erro ao criar checkout: ${errors}`);
+    }
+
+    const checkout = data.checkoutCreate.checkout;
+    
+    if (!checkout || !checkout.webUrl) {
+      throw new Error('Checkout criado mas URL não retornada');
+    }
+
+    return {
+      checkoutUrl: checkout.webUrl,
+      checkoutId: checkout.id,
+    };
+  } catch (error) {
+    console.error('Erro ao criar checkout do Shopify:', error);
+    throw error;
+  }
+}
+
+// Buscar variante de produto por ID do produto (Admin API)
+export async function getProductVariantId(productId: string): Promise<string | null> {
+  try {
+    // Buscar produto via Admin API para obter variant ID
+    const data = await adminApiRequest(`products/${productId}.json`);
+    const product = data.product;
+    
+    if (!product || !product.variants || product.variants.length === 0) {
+      return null;
+    }
+    
+    // Retornar o ID da primeira variante disponível
+    const variant = product.variants[0];
+    return variant.id.toString();
+  } catch (error) {
+    console.error('Erro ao buscar variante do produto:', error);
+    return null;
+  }
 }
