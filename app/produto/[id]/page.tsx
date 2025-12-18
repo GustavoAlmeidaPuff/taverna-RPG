@@ -6,6 +6,7 @@ import { getProductByHandle } from '@/lib/shopify';
 import { notFound } from 'next/navigation';
 import ProductActions from '@/components/ProductActions';
 import ProductGallery from '@/components/ProductGallery';
+import ProductDescription from '@/components/ProductDescription';
 
 export default async function ProductDetail({ params }: { params: { id: string } }) {
   // Buscar produto real do Shopify usando o handle
@@ -63,12 +64,9 @@ export default async function ProductDetail({ params }: { params: { id: string }
               </p>
 
               {description && (
-                <div 
-                  className="text-text mb-6 leading-relaxed prose prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: description }}
-                  style={{
-                    color: '#ebe8e0'
-                  }}
+                <ProductDescription 
+                  description={description}
+                  className="mb-6"
                 />
               )}
 
