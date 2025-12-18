@@ -20,20 +20,30 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 
   const productUrl = `${siteUrl}/produto/${product.handle}`;
   const productImage = product.image || `${siteUrl}/images/logo.png`;
-  const productDescription = product.description 
-    ? product.description.replace(/<[^>]*>/g, '').substring(0, 160)
-    : `Confira ${product.name} na Taverna RPG Store. Dados, miniaturas e acessórios para suas aventuras épicas!`;
+  
+  // Criar descrição rica com preço para melhor visualização no WhatsApp
   const price = product.originalPrice || product.price;
+  const formattedPrice = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(price);
+  
+  const productDescription = product.description 
+    ? product.description.replace(/<[^>]*>/g, '').substring(0, 200)
+    : `${product.name} – Confira na Taverna RPG Store. Dados, miniaturas e acessórios para suas aventuras épicas!`;
+  
+  // Descrição completa para Open Graph (inclui preço)
+  const fullDescription = `${productDescription} | ${formattedPrice}`;
   const currency = 'BRL';
 
   return {
-    title: product.name,
+    title: `${product.name} | ${formattedPrice} - Taverna RPG Store`,
     description: productDescription,
     openGraph: {
       type: 'website',
       url: productUrl,
       title: product.name,
-      description: productDescription,
+      description: fullDescription,
       images: [
         {
           url: productImage,
@@ -47,7 +57,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     twitter: {
       card: 'summary_large_image',
       title: product.name,
-      description: productDescription,
+      description: fullDescription,
       images: [productImage],
     },
     alternates: {
@@ -56,6 +66,8 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     other: {
       'product:price:amount': price.toFixed(2),
       'product:price:currency': currency,
+      'og:price:amount': price.toFixed(2),
+      'og:price:currency': currency,
     },
   };
 }

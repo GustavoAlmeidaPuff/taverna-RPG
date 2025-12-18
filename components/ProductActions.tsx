@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ShoppingCart, Heart, Share2 } from 'lucide-react';
+import { ShoppingCart, Heart, Share2, Check, Copy } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Product, ProductVariant } from '@/lib/shopify';
@@ -17,6 +17,7 @@ export default function ProductActions({ product, selectedVariant }: ProductActi
   const { user, isFavorite, addFavorite, removeFavorite } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const handleAddToCart = () => {
     if (!user) {
@@ -61,6 +62,71 @@ export default function ProductActions({ product, selectedVariant }: ProductActi
       }
     } catch (error) {
       console.error('Erro ao atualizar favorito:', error);
+    }
+  };
+
+  const handleShare = async () => {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    const productUrl = `${siteUrl}/produto/${product.handle}`;
+    
+    // Formatar preço
+    const price = selectedVariant?.price || product.originalPrice || product.price;
+    const formattedPrice = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(price);
+    
+    // Mensagem pré-moldada da loja de RPG
+    const shareMessage = `🎲 *Olha o que eu encontrei na Taverna RPG!*\n\n*${product.name}*\n${formattedPrice}\n\n${product.description ? product.description.replace(/<[^>]*>/g, '').substring(0, 150) + '...' : 'Confira este produto incrível para suas aventuras épicas!'}\n\n🔗 ${productUrl}?utm_source=share&utm_medium=whatsapp`;
+    
+    // URL do WhatsApp com mensagem pré-preenchida
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
+    
+    // Tentar usar Web Share API se disponível (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product.name,
+          text: shareMessage,
+          url: productUrl,
+        });
+        return;
+      } catch (error) {
+        // Usuário cancelou ou erro no compartilhamento
+        if ((error as Error).name !== 'AbortError') {
+          console.error('Erro ao compartilhar:', error);
+        }
+        // Continuar com fallback
+      }
+    }
+    
+    // Fallback: Abrir WhatsApp Web ou copiar link
+    if (window.innerWidth <= 768) {
+      // Mobile: abrir WhatsApp diretamente
+      window.open(whatsappUrl, '_blank');
+    } else {
+      // Desktop: copiar link para área de transferência
+      try {
+        await navigator.clipboard.writeText(shareMessage);
+        setLinkCopied(true);
+        setTimeout(() => setLinkCopied(false), 2000);
+      } catch (error) {
+        // Fallback para navegadores antigos
+        const textArea = document.createElement('textarea');
+        textArea.value = shareMessage;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          setLinkCopied(true);
+          setTimeout(() => setLinkCopied(false), 2000);
+        } catch (err) {
+          console.error('Erro ao copiar:', err);
+        }
+        document.body.removeChild(textArea);
+      }
     }
   };
 
@@ -141,14 +207,20 @@ export default function ProductActions({ product, selectedVariant }: ProductActi
           
           {/* Botão Compartilhar */}
           <button 
-            className="w-12 h-12 rounded-lg flex items-center justify-center hover:opacity-90 transition-opacity flex-shrink-0"
+            onClick={handleShare}
+            className="w-12 h-12 rounded-lg flex items-center justify-center hover:opacity-90 transition-opacity flex-shrink-0 relative"
             style={{
-              backgroundColor: '#221A16',
+              backgroundColor: linkCopied ? '#DF9F26' : '#221A16',
               border: '1px solid #DF9F26',
-              color: '#DF9F26'
+              color: linkCopied ? '#2c1810' : '#DF9F26'
             }}
+            title={linkCopied ? 'Link copiado!' : 'Compartilhar produto'}
           >
-            <Share2 className="w-5 h-5" />
+            {linkCopied ? (
+              <Check className="w-5 h-5" />
+            ) : (
+              <Share2 className="w-5 h-5" />
+            )}
           </button>
         </div>
       </div>

@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { Product } from '@/lib/shopify';
 
 interface SearchProductCardProps {
@@ -29,12 +28,10 @@ export default function SearchProductCard({ product }: SearchProductCardProps) {
       {/* Imagem do produto */}
       <div className="relative w-full aspect-square bg-gray-800 overflow-hidden">
         {product.image ? (
-          <Image
+          <img
             src={product.image}
             alt={product.name}
-            fill
-            unoptimized
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
