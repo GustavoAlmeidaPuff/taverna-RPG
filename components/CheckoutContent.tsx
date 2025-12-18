@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCart } from '@/contexts/CartContext';
+import { useCart, getCartItemId } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { Trash2, Gift, Loader2 } from 'lucide-react';
@@ -50,68 +50,71 @@ export function CheckoutContent() {
         {/* Cart Items */}
         <div className="lg:col-span-2">
           <div className="space-y-4">
-            {items.map((item) => (
-              <div key={item.id} className="bg-[#281E19] rounded-lg p-4 md:p-6 relative">
-                {/* Trash Icon - Top Right */}
-                <button 
-                  onClick={() => removeItem(item.id)}
-                  className="absolute top-4 right-4 text-[#E0DEDC] hover:text-[#DFA026] transition-colors"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
-                
-                <div className="flex gap-4">
-                  {/* Product Image */}
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded flex items-center justify-center flex-shrink-0 bg-gray-700 overflow-hidden">
-                    {item.image ? (
-                      <img 
-                        src={item.image} 
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-600 flex items-center justify-center">
-                        <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
+            {items.map((item) => {
+              const cartItemId = getCartItemId(item);
+              return (
+                <div key={cartItemId} className="bg-[#281E19] rounded-lg p-4 md:p-6 relative">
+                  {/* Trash Icon - Top Right */}
+                  <button 
+                    onClick={() => removeItem(cartItemId)}
+                    className="absolute top-4 right-4 text-[#E0DEDC] hover:text-[#DFA026] transition-colors"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
                   
-                  {/* Product Info */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-[#E0DEDC] font-bold mb-2 uppercase text-sm md:text-base">{item.name}</h3>
-                    <p className="text-[#DFA026] font-bold text-lg md:text-xl mb-3">
-                      R$ {item.price.toFixed(2).replace('.', ',')}
-                    </p>
-                    
-                    {/* Quantity Controls */}
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="flex items-center border border-[#3d3128] rounded overflow-hidden">
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="px-3 py-1.5 md:px-4 md:py-2 bg-[#281E19] text-[#E0DEDC] hover:bg-[#322520] transition-colors"
-                        >
-                          -
-                        </button>
-                        <span className="px-4 md:px-6 py-1.5 md:py-2 text-[#E0DEDC] bg-[#281E19]">{item.quantity}</span>
-                        <button 
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="px-3 py-1.5 md:px-4 md:py-2 bg-[#281E19] text-[#E0DEDC] hover:bg-[#322520] transition-colors"
-                        >
-                          +
-                        </button>
-                      </div>
+                  <div className="flex gap-4">
+                    {/* Product Image */}
+                    <div className="w-20 h-20 md:w-24 md:h-24 rounded flex items-center justify-center flex-shrink-0 bg-gray-700 overflow-hidden">
+                      {item.image ? (
+                        <img 
+                          src={item.image} 
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-600 flex items-center justify-center">
+                          <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
                     </div>
                     
-                    {/* Subtotal */}
-                    <p className="text-[#E0DEDC] text-sm">
-                      Subtotal: R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
-                    </p>
+                    {/* Product Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[#E0DEDC] font-bold mb-2 uppercase text-sm md:text-base">{item.name}</h3>
+                      <p className="text-[#DFA026] font-bold text-lg md:text-xl mb-3">
+                        R$ {item.price.toFixed(2).replace('.', ',')}
+                      </p>
+                      
+                      {/* Quantity Controls */}
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center border border-[#3d3128] rounded overflow-hidden">
+                          <button 
+                            onClick={() => updateQuantity(cartItemId, item.quantity - 1)}
+                            className="px-3 py-1.5 md:px-4 md:py-2 bg-[#281E19] text-[#E0DEDC] hover:bg-[#322520] transition-colors"
+                          >
+                            -
+                          </button>
+                          <span className="px-4 md:px-6 py-1.5 md:py-2 text-[#E0DEDC] bg-[#281E19]">{item.quantity}</span>
+                          <button 
+                            onClick={() => updateQuantity(cartItemId, item.quantity + 1)}
+                            className="px-3 py-1.5 md:px-4 md:py-2 bg-[#281E19] text-[#E0DEDC] hover:bg-[#322520] transition-colors"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Subtotal */}
+                      <p className="text-[#E0DEDC] text-sm">
+                        Subtotal: R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -203,9 +206,14 @@ export function CheckoutContent() {
                 }
               }}
               disabled={isProcessing}
-              className="w-full bg-gradient-to-r from-orange-600 to-[#DFA026] text-[#E0DEDC] py-3 rounded-lg font-bold hover:opacity-90 transition-opacity mb-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase"
+              className="w-full py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity mb-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase"
               style={{
-                background: 'linear-gradient(to right, #ea580c, #DFA026)'
+                background: 'linear-gradient(to right, #FFC107, #F7931A)',
+                border: '2px solid #33281E',
+                borderRadius: '10px',
+                fontFamily: 'var(--font-merriweather), serif',
+                color: '#33281E',
+                fontWeight: 600
               }}
             >
               {isProcessing ? (

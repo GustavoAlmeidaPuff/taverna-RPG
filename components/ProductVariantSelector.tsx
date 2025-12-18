@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Product, ProductVariant } from '@/lib/shopify';
-import ProductVariants from './ProductVariants';
 import ProductActions from './ProductActions';
 
 interface ProductVariantSelectorProps {
@@ -44,16 +43,6 @@ export default function ProductVariantSelector({ product, onVariantChange }: Pro
 
   return (
     <>
-      {/* Seleção de Variantes */}
-      {product.variants && product.variants.length > 1 && (
-        <ProductVariants
-          variants={product.variants}
-          selectedVariantId={selectedVariant?.id}
-          onVariantSelect={handleVariantSelect}
-          productName={product.name}
-        />
-      )}
-
       {/* Preço atualizado baseado na variante selecionada */}
       <p className="text-primary text-4xl font-bold mb-6">
         R$ {displayPrice.toFixed(2).replace('.', ',')}

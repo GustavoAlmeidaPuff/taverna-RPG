@@ -19,16 +19,26 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// Função helper para gerar ID único do item no carrinho
+// Se houver variantId, usa produto + variante, senão usa apenas o ID do produto
+export function getCartItemId(product: Product): string {
+  if (product.variantId) {
+    return `${product.id}-${product.variantId}`;
+  }
+  return product.id;
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
   const addItem = (product: Product) => {
     setItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === product.id);
+      const cartItemId = getCartItemId(product);
+      const existingItem = prevItems.find((item) => getCartItemId(item) === cartItemId);
       
       if (existingItem) {
         return prevItems.map((item) =>
-          item.id === product.id
+          getCartItemId(item) === cartItemId
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
@@ -39,7 +49,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeItem = (productId: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+    setItems((prevItems) => prevItems.filter((item) => getCartItemId(item) !== productId));
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -50,7 +60,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     
     setItems((prevItems) =>
       prevItems.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
+        getCartItemId(item) === productId ? { ...item, quantity } : item
       )
     );
   };

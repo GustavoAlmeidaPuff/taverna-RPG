@@ -6,6 +6,7 @@ import { Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '@/lib/shopify';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import AuthModal from '@/components/AuthModal';
 
 interface ProductsProps {
@@ -17,6 +18,7 @@ interface ProductsProps {
 export default function Products({ title, subtitle, products }: ProductsProps) {
   const { addItem } = useCart();
   const { user, isFavorite, addFavorite, removeFavorite } = useAuth();
+  const { showToast } = useToast();
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -33,6 +35,7 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
     }
     
     addItem(product);
+    showToast(`${product.name} adicionado ao baú!`, 'success');
   };
 
   const handleToggleFavorite = async (e: React.MouseEvent, product: Product) => {
@@ -223,6 +226,7 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
         onSuccess={() => {
           if (pendingProduct) {
             addItem(pendingProduct);
+            showToast(`${pendingProduct.name} adicionado ao baú!`, 'success');
             setPendingProduct(null);
           }
         }}

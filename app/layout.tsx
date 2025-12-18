@@ -1,13 +1,21 @@
 import type { Metadata } from "next";
-import { Cinzel } from "next/font/google";
+import { Cinzel, Merriweather } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ToastProvider } from "@/contexts/ToastContext";
+import ToastContainer from "@/components/Toast";
 
 const cinzel = Cinzel({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   variable: "--font-cinzel",
+});
+
+const merriweather = Merriweather({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-merriweather",
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://taverna-rpg-store.vercel.app';
@@ -112,7 +120,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="pt-BR" className={cinzel.variable}>
+    <html lang="pt-BR" className={`${cinzel.variable} ${merriweather.variable}`}>
       <head>
         <script
           type="application/ld+json"
@@ -122,7 +130,10 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <CartProvider>
-            {children}
+            <ToastProvider>
+              {children}
+              <ToastContainer />
+            </ToastProvider>
           </CartProvider>
         </AuthProvider>
       </body>

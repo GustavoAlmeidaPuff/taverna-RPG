@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { ShoppingCart, Heart, Share2, Check, Copy } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/contexts/ToastContext';
 import { Product, ProductVariant } from '@/lib/shopify';
 import AuthModal from '@/components/AuthModal';
+import VariantSelectionModal from '@/components/VariantSelectionModal';
 
 interface ProductActionsProps {
   product: Product;
@@ -15,13 +17,21 @@ interface ProductActionsProps {
 export default function ProductActions({ product, selectedVariant }: ProductActionsProps) {
   const { addItem } = useCart();
   const { user, isFavorite, addFavorite, removeFavorite } = useAuth();
+  const { showToast } = useToast();
   const [quantity, setQuantity] = useState(1);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showVariantModal, setShowVariantModal] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
 
   const handleAddToCart = () => {
     if (!user) {
       setShowAuthModal(true);
+      return;
+    }
+    
+    // Se o produto tem variantes, mostrar modal de seleção
+    if (product.variants && product.variants.length > 1) {
+      setShowVariantModal(true);
       return;
     }
     
@@ -36,6 +46,37 @@ export default function ProductActions({ product, selectedVariant }: ProductActi
     for (let i = 0; i < quantity; i++) {
       addItem(productToAdd);
     }
+
+    // Mostrar notificação de sucesso
+    const message = quantity > 1 
+      ? `${quantity}x ${product.name} adicionado${quantity > 1 ? 's' : ''} ao baú!`
+      : `${product.name} adicionado ao baú!`;
+    showToast(message, 'success');
+  };
+
+  const handleAddVariantToCart = (variant: ProductVariant, variantQuantity: number) => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+    
+    // Criar um produto com a variante selecionada
+    const productToAdd: Product = {
+      ...product,
+      variantId: variant.variantId,
+      price: variant.price,
+      image: variant.image || product.image,
+    };
+    
+    for (let i = 0; i < variantQuantity; i++) {
+      addItem(productToAdd);
+    }
+
+    // Mostrar notificação de sucesso
+    const message = variantQuantity > 1 
+      ? `${variantQuantity}x ${product.name} - ${variant.title} adicionado${variantQuantity > 1 ? 's' : ''} ao baú!`
+      : `${product.name} - ${variant.title} adicionado ao baú!`;
+    showToast(message, 'success');
   };
 
   const incrementQuantity = () => {
@@ -230,17 +271,36 @@ export default function ProductActions({ product, selectedVariant }: ProductActi
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onSuccess={() => {
-          // Após login bem-sucedido, adiciona o item ao carrinho
-          const productToAdd: Product = {
-            ...product,
-            variantId: selectedVariant?.variantId || product.variantId,
-            price: selectedVariant?.price || product.price,
-            image: selectedVariant?.image || product.image,
-          };
-          for (let i = 0; i < quantity; i++) {
-            addItem(productToAdd);
+          // Após login bem-sucedido, verificar se precisa mostrar modal de variantes
+          if (product.variants && product.variants.length > 1) {
+            setShowVariantModal(true);
+          } else {
+            // Adiciona o item ao carrinho diretamente
+            const productToAdd: Product = {
+              ...product,
+              variantId: selectedVariant?.variantId || product.variantId,
+              price: selectedVariant?.price || product.price,
+              image: selectedVariant?.image || product.image,
+            };
+            for (let i = 0; i < quantity; i++) {
+              addItem(productToAdd);
+            }
+            
+            // Mostrar notificação de sucesso
+            const message = quantity > 1 
+              ? `${quantity}x ${product.name} adicionado${quantity > 1 ? 's' : ''} ao baú!`
+              : `${product.name} adicionado ao baú!`;
+            showToast(message, 'success');
           }
         }}
+      />
+
+      {/* Variant Selection Modal */}
+      <VariantSelectionModal
+        isOpen={showVariantModal}
+        onClose={() => setShowVariantModal(false)}
+        product={product}
+        onAddToCart={handleAddVariantToCart}
       />
     </div>
   );
