@@ -16,7 +16,7 @@ interface ProductsProps {
 
 export default function Products({ title, subtitle, products }: ProductsProps) {
   const { addItem } = useCart();
-  const { user } = useAuth();
+  const { user, isFavorite, addFavorite, removeFavorite } = useAuth();
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -33,6 +33,26 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
     }
     
     addItem(product);
+  };
+
+  const handleToggleFavorite = async (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    try {
+      if (isFavorite(product.id)) {
+        await removeFavorite(product.id);
+      } else {
+        await addFavorite(product.id);
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar favorito:', error);
+    }
   };
 
   const getPrimaryImage = (product: Product): string => {
@@ -141,13 +161,20 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
                 {/* Action Buttons - aparecem no hover */}
                 <div className="absolute bottom-1 right-1 md:bottom-2 md:right-2 flex gap-1 md:gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                   <button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    className="hidden md:flex w-8 h-8 md:w-10 md:h-10 bg-card border border-border rounded-full items-center justify-center hover:bg-primary hover:border-primary transition-colors"
+                    onClick={(e) => handleToggleFavorite(e, product)}
+                    className={`hidden md:flex w-8 h-8 md:w-10 md:h-10 bg-card border rounded-full items-center justify-center transition-colors ${
+                      isFavorite(product.id)
+                        ? 'border-primary bg-primary'
+                        : 'border-border hover:bg-primary hover:border-primary'
+                    }`}
                   >
-                    <Heart className="text-card-text w-4 h-4 md:w-5 md:h-5" />
+                    <Heart 
+                      className={`w-4 h-4 md:w-5 md:h-5 ${
+                        isFavorite(product.id)
+                          ? 'text-primary-text fill-current'
+                          : 'text-card-text'
+                      }`}
+                    />
                   </button>
                   <button 
                     onClick={(e) => handleAddToCart(e, product)}

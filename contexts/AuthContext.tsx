@@ -11,16 +11,20 @@ import {
   onAuthStateChanged,
   updateProfile
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  favorites: string[];
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  addFavorite: (productId: string) => Promise<void>;
+  removeFavorite: (productId: string) => Promise<void>;
+  isFavorite: (productId: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,6 +32,24 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<string[]>([]);
+
+  // Carregar favoritos do Firestore
+  const loadFavorites = async (userId: string) => {
+    if (!db) return;
+    
+    try {
+      const userRef = doc(db, 'users', userId);
+      const snapshot = await getDoc(userRef);
+      
+      if (snapshot.exists()) {
+        const userData = snapshot.data();
+        setFavorites(userData.favorites || []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar favoritos:', error);
+    }
+  };
 
   useEffect(() => {
     if (!auth) {
@@ -36,6 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
+      if (user) {
+        loadFavorites(user.uid);
+      } else {
+        setFavorites([]);
+      }
       setLoading(false);
     });
 
@@ -135,9 +162,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     try {
       await firebaseSignOut(auth);
+      setFavorites([]);
     } catch (error) {
       console.error('Erro ao sair:', error);
     }
+  };
+
+  // Adicionar produto aos favoritos
+  const addFavorite = async (productId: string) => {
+    if (!user || !db) {
+      throw new Error('Usuário não está logado');
+    }
+
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      
+      // Garantir que o documento existe
+      const snapshot = await getDoc(userRef);
+      if (!snapshot.exists()) {
+        await createUserDocument(user);
+      }
+      
+      await updateDoc(userRef, {
+        favorites: arrayUnion(productId)
+      });
+      
+      setFavorites(prev => [...prev, productId]);
+    } catch (error) {
+      console.error('Erro ao adicionar favorito:', error);
+      throw error;
+    }
+  };
+
+  // Remover produto dos favoritos
+  const removeFavorite = async (productId: string) => {
+    if (!user || !db) {
+      throw new Error('Usuário não está logado');
+    }
+
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        favorites: arrayRemove(productId)
+      });
+      
+      setFavorites(prev => prev.filter(id => id !== productId));
+    } catch (error) {
+      console.error('Erro ao remover favorito:', error);
+      throw error;
+    }
+  };
+
+  // Verificar se produto está favoritado
+  const isFavorite = (productId: string): boolean => {
+    return favorites.includes(productId);
   };
 
   return (
@@ -145,10 +223,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         loading,
+        favorites,
         signIn,
         signUp,
         signInWithGoogle,
         signOut,
+        addFavorite,
+        removeFavorite,
+        isFavorite,
       }}
     >
       {children}

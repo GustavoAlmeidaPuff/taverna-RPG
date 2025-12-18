@@ -13,7 +13,7 @@ interface ProductActionsProps {
 
 export default function ProductActions({ product }: ProductActionsProps) {
   const { addItem } = useCart();
-  const { user } = useAuth();
+  const { user, isFavorite, addFavorite, removeFavorite } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -35,6 +35,23 @@ export default function ProductActions({ product }: ProductActionsProps) {
   const decrementQuantity = () => {
     if (quantity > 1) {
       setQuantity(prev => prev - 1);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    try {
+      if (isFavorite(product.id)) {
+        await removeFavorite(product.id);
+      } else {
+        await addFavorite(product.id);
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar favorito:', error);
     }
   };
 
@@ -102,14 +119,15 @@ export default function ProductActions({ product }: ProductActionsProps) {
         <div className="flex items-center gap-4 sm:gap-2 lg:gap-4 justify-center sm:justify-start">
           {/* Botão Favorito */}
           <button 
+            onClick={handleToggleFavorite}
             className="w-12 h-12 rounded-lg flex items-center justify-center hover:opacity-90 transition-opacity flex-shrink-0"
             style={{
-              backgroundColor: '#221A16',
+              backgroundColor: isFavorite(product.id) ? '#DF9F26' : '#221A16',
               border: '1px solid #DF9F26',
-              color: '#DF9F26'
+              color: isFavorite(product.id) ? '#2c1810' : '#DF9F26'
             }}
           >
-            <Heart className="w-5 h-5" />
+            <Heart className={`w-5 h-5 ${isFavorite(product.id) ? 'fill-current' : ''}`} />
           </button>
           
           {/* Botão Compartilhar */}
