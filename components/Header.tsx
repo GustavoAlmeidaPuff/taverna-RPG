@@ -22,6 +22,7 @@ export default function Header() {
   const [isSearching, setIsSearching] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -207,7 +208,16 @@ export default function Header() {
                     placeholder="O que você procura, aventureiro?"
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    onFocus={() => searchQuery && setIsSearchOpen(true)}
+                    onFocus={() => {
+                      setIsSearchFocused(true);
+                      // Só mostra resultados se já houver texto digitado
+                      if (searchQuery.trim()) {
+                        setIsSearchOpen(true);
+                      }
+                    }}
+                    onBlur={() => {
+                      setIsSearchFocused(false);
+                    }}
                     className="w-full rounded-lg py-2 pl-10 pr-4 focus:outline-none"
                     style={{
                       fontFamily: "'Cinzel', serif",
@@ -239,6 +249,7 @@ export default function Header() {
                           {searchResults.map((product) => (
                             <button
                               key={product.id}
+                              type="button"
                               onClick={() => handleProductClick(product.handle)}
                               className="w-full p-4 hover:bg-[#2a1f1a] transition-colors text-left flex items-center gap-4 border-b border-[#DFA026]/10 last:border-b-0"
                             >
@@ -358,7 +369,16 @@ export default function Header() {
                   placeholder="Buscar..."
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  onFocus={() => searchQuery && setIsSearchOpen(true)}
+                  onFocus={() => {
+                    setIsSearchFocused(true);
+                    // Só mostra resultados se já houver texto digitado
+                    if (searchQuery.trim()) {
+                      setIsSearchOpen(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    setIsSearchFocused(false);
+                  }}
                   className="w-full rounded-lg py-2 pl-10 pr-4 focus:outline-none"
                   style={{
                     fontFamily: "'Cinzel', serif",
@@ -387,6 +407,7 @@ export default function Header() {
                         {searchResults.map((product) => (
                           <button
                             key={product.id}
+                            type="button"
                             onClick={() => handleProductClick(product.handle)}
                             className="w-full p-4 hover:bg-[#2a1f1a] transition-colors text-left flex items-center gap-4 border-b border-[#DFA026]/10 last:border-b-0"
                           >
