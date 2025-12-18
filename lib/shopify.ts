@@ -93,6 +93,15 @@ export interface ShopifyProduct {
   };
 }
 
+export interface ProductVariant {
+  id: string;
+  title: string;
+  price: number;
+  available: boolean;
+  image?: string; // Imagem específica da variante
+  variantId: string; // ID da variante do produto no Shopify (necessário para checkout)
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -107,6 +116,7 @@ export interface Product {
   variantId?: string; // ID da variante do produto no Shopify (necessário para checkout)
   shopifyProductId?: string; // ID do produto no Shopify (formato gid://shopify/Product/...)
   tags?: string; // Tags do produto (string separada por vírgulas)
+  variants?: ProductVariant[]; // Array de variantes do produto
 }
 
 // Query GraphQL para buscar todos os produtos
@@ -250,18 +260,55 @@ export async function getProductByHandle(handle: string): Promise<Product | null
     if (!product) return null;
     
     const allImages = (product.images || []).map((img: any) => img.src).filter(Boolean);
-    const variant = product.variants?.[0];
+    const firstVariant = product.variants?.[0];
+    
+    // Processar todas as variantes
+    const variants: ProductVariant[] = (product.variants || []).map((variant: any, index: number) => {
+      // Buscar imagem associada à variante
+      // Na Admin API, podemos tentar associar imagens por posição ou usar metafields
+      // Por enquanto, vamos usar uma estratégia simples: se houver múltiplas imagens,
+      // associar por índice (se o número de imagens corresponder ao número de variantes)
+      let variantImage: string | undefined;
+      
+      // Se houver image_id na variante (alguns apps/extensões podem adicionar isso)
+      if (variant.image_id) {
+        const variantImageObj = product.images?.find((img: any) => img.id === variant.image_id);
+        variantImage = variantImageObj?.src;
+      }
+      
+      // Se não encontrou por image_id, tentar associar por posição
+      // (assumindo que a primeira imagem corresponde à primeira variante, etc.)
+      if (!variantImage && allImages.length > 1 && index < allImages.length) {
+        variantImage = allImages[index];
+      }
+      
+      // Se ainda não tiver imagem específica, usar a primeira imagem do produto
+      if (!variantImage && allImages.length > 0) {
+        variantImage = allImages[0];
+      }
+      
+      return {
+        id: variant.id.toString(),
+        title: variant.title || 'Padrão',
+        price: parseFloat(variant.price || '0'),
+        available: variant.available !== false && (variant.inventory_quantity > 0 || variant.inventory_policy === 'continue' || variant.inventory_management === null),
+        image: variantImage,
+        variantId: variant.id.toString(),
+      };
+    });
+    
     return {
       id: product.id.toString(),
       name: product.title,
-      price: parseFloat(variant?.price || '0'),
+      price: parseFloat(firstVariant?.price || '0'),
       image: allImages[0] || '',
       images: allImages.length > 1 ? allImages : undefined, // Só inclui se tiver mais de uma imagem
       description: product.body_html || '',
       handle: product.handle,
-      variantId: variant?.id?.toString(), // ID da variante para checkout
+      variantId: firstVariant?.id?.toString(), // ID da primeira variante para compatibilidade
       shopifyProductId: `gid://shopify/Product/${product.id}`, // ID no formato GraphQL
       tags: product.tags || '', // Tags do produto
+      variants: variants.length > 1 ? variants : undefined, // Só inclui se tiver mais de uma variante
     };
   } catch (error) {
     console.error('Erro ao buscar produto do Shopify:', error);

@@ -4,14 +4,15 @@ import { useState } from 'react';
 import { ShoppingCart, Heart, Share2 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Product } from '@/lib/shopify';
+import { Product, ProductVariant } from '@/lib/shopify';
 import AuthModal from '@/components/AuthModal';
 
 interface ProductActionsProps {
   product: Product;
+  selectedVariant?: ProductVariant;
 }
 
-export default function ProductActions({ product }: ProductActionsProps) {
+export default function ProductActions({ product, selectedVariant }: ProductActionsProps) {
   const { addItem } = useCart();
   const { user, isFavorite, addFavorite, removeFavorite } = useAuth();
   const [quantity, setQuantity] = useState(1);
@@ -23,8 +24,16 @@ export default function ProductActions({ product }: ProductActionsProps) {
       return;
     }
     
+    // Criar um produto com a variante selecionada
+    const productToAdd: Product = {
+      ...product,
+      variantId: selectedVariant?.variantId || product.variantId,
+      price: selectedVariant?.price || product.price,
+      image: selectedVariant?.image || product.image,
+    };
+    
     for (let i = 0; i < quantity; i++) {
-      addItem(product);
+      addItem(productToAdd);
     }
   };
 
@@ -150,8 +159,14 @@ export default function ProductActions({ product }: ProductActionsProps) {
         onClose={() => setShowAuthModal(false)}
         onSuccess={() => {
           // Após login bem-sucedido, adiciona o item ao carrinho
+          const productToAdd: Product = {
+            ...product,
+            variantId: selectedVariant?.variantId || product.variantId,
+            price: selectedVariant?.price || product.price,
+            image: selectedVariant?.image || product.image,
+          };
           for (let i = 0; i < quantity; i++) {
-            addItem(product);
+            addItem(productToAdd);
           }
         }}
       />

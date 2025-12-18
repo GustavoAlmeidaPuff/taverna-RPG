@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface ProductGalleryProps {
   images: string[];
   badge?: 'novo' | 'oferta' | 'lançamento';
   productName: string;
+  primaryImage?: string; // Imagem principal que pode ser atualizada (ex: quando variante muda)
 }
 
-export default function ProductGallery({ images, badge, productName }: ProductGalleryProps) {
+export default function ProductGallery({ images, badge, productName, primaryImage }: ProductGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
@@ -17,7 +18,20 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
 
   // Garantir que sempre tenha pelo menos uma imagem
   const allImages = images && images.length > 0 ? images : ['/images/placeholder.png'];
-  const currentImage = allImages[selectedIndex];
+  
+  // Se primaryImage for fornecida e estiver na lista, usar ela como primeira
+  const displayImages = primaryImage && !allImages.includes(primaryImage) 
+    ? [primaryImage, ...allImages] 
+    : allImages;
+  
+  const currentImage = displayImages[selectedIndex];
+
+  // Resetar índice quando primaryImage mudar
+  useEffect(() => {
+    if (primaryImage && displayImages[0] === primaryImage) {
+      setSelectedIndex(0);
+    }
+  }, [primaryImage, displayImages]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isZoomed) return;
@@ -49,10 +63,10 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
     if (Math.abs(diff) > minSwipeDistance) {
       if (diff > 0) {
         // Swipe para a esquerda - próxima imagem
-        setSelectedIndex((prev) => (prev + 1) % allImages.length);
+        setSelectedIndex((prev) => (prev + 1) % displayImages.length);
       } else {
         // Swipe para a direita - imagem anterior
-        setSelectedIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+        setSelectedIndex((prev) => (prev - 1 + displayImages.length) % displayImages.length);
       }
     }
 
@@ -64,10 +78,10 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
     <div className="w-full">
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Miniaturas Verticais (Desktop) */}
-        {allImages.length > 1 && (
+        {displayImages.length > 1 && (
           <div className="order-2 lg:order-1 hidden lg:block flex-shrink-0">
             <div className="flex flex-col gap-2 max-h-[500px] overflow-y-auto scrollbar-hide">
-              {allImages.map((image, index) => (
+              {displayImages.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedIndex(index)}
@@ -76,7 +90,7 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
                       ? 'border-primary ring-2 ring-primary/50'
                       : 'border-border hover:border-primary/50 opacity-75 hover:opacity-100'
                   }`}
-                  aria-label={`Ver imagem ${index + 1} de ${allImages.length}`}
+                  aria-label={`Ver imagem ${index + 1} de ${displayImages.length}`}
                 >
                   <img
                     src={image}
@@ -128,9 +142,9 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
           </div>
 
           {/* Miniaturas Horizontais (Mobile) */}
-          {allImages.length > 1 && (
+          {displayImages.length > 1 && (
             <div className="mt-4 lg:hidden flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              {allImages.map((image, index) => (
+              {displayImages.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedIndex(index)}
@@ -139,7 +153,7 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
                       ? 'border-primary ring-2 ring-primary/50'
                       : 'border-border hover:border-primary/50 opacity-75 hover:opacity-100'
                   }`}
-                  aria-label={`Ver imagem ${index + 1} de ${allImages.length}`}
+                  aria-label={`Ver imagem ${index + 1} de ${displayImages.length}`}
                 >
                   <img
                     src={image}
