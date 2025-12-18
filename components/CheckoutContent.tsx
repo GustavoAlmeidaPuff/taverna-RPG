@@ -9,7 +9,7 @@ import { Trash2, Gift, Loader2 } from 'lucide-react';
 import AuthModal from '@/components/AuthModal';
 
 export function CheckoutContent() {
-  const { items, removeItem, updateQuantity, getTotal } = useCart();
+  const { items, removeItem, updateQuantity, getTotal, loading } = useCart();
   const { user } = useAuth();
   const router = useRouter();
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -22,6 +22,14 @@ export function CheckoutContent() {
       setShowAuthModal(true);
     }
   }, [user, items.length]);
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-[#E0DEDC]">Carregando seu baú...</p>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -198,8 +206,20 @@ export function CheckoutContent() {
                     throw new Error(data.message || data.error || 'Erro ao processar checkout');
                   }
 
-                  // Redirecionar para o checkout do Shopify
-                  if (data.checkoutUrl) {
+                  // Salvar dados temporários do checkout para associar depois
+                  if (data.checkoutUrl && data.checkoutId) {
+                    // Salvar checkoutId temporariamente no localStorage para associar depois
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('pendingCheckout', JSON.stringify({
+                        checkoutId: data.checkoutId,
+                        checkoutUrl: data.checkoutUrl,
+                        items: items,
+                        total: getTotal(),
+                        timestamp: Date.now()
+                      }));
+                    }
+                    // Redirecionar para o checkout do Shopify
+                    // O histórico será criado apenas quando o pagamento for confirmado
                     window.location.href = data.checkoutUrl;
                   } else {
                     throw new Error('URL de checkout não retornada');

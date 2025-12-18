@@ -31,10 +31,15 @@ export async function POST(request: NextRequest) {
     // Criar checkout no Shopify
     const checkout = await createCheckout(lineItems);
 
+    // Adicionar URL de retorno para verificar status após pagamento
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const returnUrl = `${siteUrl}/checkout/success?checkoutId=${checkout.checkoutId}`;
+
     return NextResponse.json({
       success: true,
       checkoutUrl: checkout.checkoutUrl,
       checkoutId: checkout.checkoutId,
+      returnUrl: returnUrl,
     });
   } catch (error: any) {
     console.error('Erro ao processar checkout:', error);
