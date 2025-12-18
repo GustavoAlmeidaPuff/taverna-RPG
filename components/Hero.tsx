@@ -2,7 +2,7 @@ import { Dice6 } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <section className="relative min-h-[300px] md:min-h-[600px] flex items-center bg-background">
+    <section className="relative min-h-[180px] md:min-h-[600px] flex items-center bg-background">
       {/* PLACEHOLDER BACKGROUND IMAGE - será substituída por imagem real da taverna */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-30"
@@ -19,11 +19,11 @@ export default function Hero() {
         }}
       ></div>
       
-      <div className="container mx-auto pr-4 md:px-4 relative z-10 py-8 md:py-20">
+      <div className="container mx-auto pr-4 md:px-4 relative z-10 py-4 md:py-20">
         <div className="max-w-2xl pl-0 md:pl-12 ml-[10px] mr-0">
           {/* Welcome Badge */}
           <div 
-            className="inline-flex items-center gap-2 border rounded-lg px-4 py-2 mb-6" 
+            className="inline-flex items-center gap-2 border rounded-lg px-4 py-2 mb-3 md:mb-6" 
             style={{ 
               fontFamily: "'Cinzel', serif",
               borderColor: '#E0B64D',
@@ -37,7 +37,7 @@ export default function Hero() {
           </div>
 
           {/* Main Title */}
-          <h1 className="text-5xl md:text-7xl font-bold mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
+          <h1 className="text-5xl md:text-7xl font-bold mb-3 md:mb-6" style={{ fontFamily: 'var(--font-cinzel), serif' }}>
             <span className="text-[#EAE7DF]">EQUIPE SUA </span>
             <span 
               className="text-[#DFA026]"
