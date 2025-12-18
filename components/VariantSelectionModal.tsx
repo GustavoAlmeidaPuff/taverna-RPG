@@ -104,34 +104,34 @@ export default function VariantSelectionModal({
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div
-          className={`bg-[#1d1816] border-2 border-[#DFA026] rounded-lg shadow-2xl w-full max-w-lg pointer-events-auto transition-all duration-300 ${
+          className={`bg-[#1d1816] border-2 border-[#DFA026] rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col pointer-events-auto transition-all duration-300 ${
             isClosing ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
           }`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-[#DFA026]/20">
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[#DFA026]/20 flex-shrink-0">
             <div>
               <h2
-                className="text-2xl font-bold text-[#DFA026] mb-1"
+                className="text-xl sm:text-2xl font-bold text-[#DFA026] mb-1"
                 style={{ fontFamily: "'Cinzel', serif" }}
               >
                 Selecione a Variante
               </h2>
-              <p className="text-[#ebe8e0] text-sm">{product.name}</p>
+              <p className="text-[#ebe8e0] text-xs sm:text-sm truncate">{product.name}</p>
             </div>
             <button
               onClick={handleClose}
-              className="text-[#ebe8e0] hover:text-[#DFA026] transition-colors"
+              className="text-[#ebe8e0] hover:text-[#DFA026] transition-colors flex-shrink-0"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
 
-          {/* Body */}
-          <div className="p-6">
-            {/* Lista de Variantes */}
-            <div className="space-y-3 mb-6">
+          {/* Body - Scrollable */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            {/* Lista de Variantes - Grid 2 colunas */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
               {product.variants.map((variant) => {
                 const isSelected = selectedVariant?.id === variant.id;
                 const variantColor = getVariantColor(variant.title);
@@ -142,7 +142,7 @@ export default function VariantSelectionModal({
                     onClick={() => variant.available && setSelectedVariant(variant)}
                     disabled={!variant.available}
                     className={`
-                      w-full flex items-center gap-4 p-4 rounded-lg border-2 transition-all
+                      flex flex-col items-center gap-2 p-3 sm:p-4 rounded-lg border-2 transition-all
                       ${isSelected 
                         ? 'bg-card' 
                         : 'border-border bg-background hover:border-primary/50'
@@ -158,7 +158,7 @@ export default function VariantSelectionModal({
                     {/* Ícone/Imagem da Variante */}
                     <div className="flex-shrink-0">
                       {variant.image ? (
-                        <div className="w-16 h-16 rounded-lg overflow-hidden border-2 border-border">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden border-2 border-border">
                           <img
                             src={variant.image}
                             alt={`${product.name} - ${variant.title}`}
@@ -167,11 +167,11 @@ export default function VariantSelectionModal({
                         </div>
                       ) : (
                         <div 
-                          className="w-16 h-16 rounded-lg flex items-center justify-center border-2 border-border"
+                          className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg flex items-center justify-center border-2 border-border"
                           style={{ backgroundColor: `${variantColor}20` }}
                         >
                           <div 
-                            className="w-10 h-10 rounded"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded"
                             style={{ backgroundColor: variantColor }}
                           />
                         </div>
@@ -179,20 +179,22 @@ export default function VariantSelectionModal({
                     </div>
                     
                     {/* Informações da Variante */}
-                    <div className="flex-1 text-left min-w-0">
-                      <p className={`font-semibold text-base ${isSelected ? 'text-primary' : 'text-text'}`}>
+                    <div className="flex-1 w-full text-center min-w-0">
+                      <p className={`font-semibold text-xs sm:text-sm ${isSelected ? 'text-primary' : 'text-text'} truncate`}>
                         {variant.title}
                       </p>
-                      <p className="text-sm text-muted-text">
+                      <p className="text-xs text-muted-text">
                         R$ {variant.price.toFixed(2).replace('.', ',')}
-                        {!variant.available && ' - Indisponível'}
                       </p>
+                      {!variant.available && (
+                        <p className="text-xs text-red-400 mt-1">Indisponível</p>
+                      )}
                     </div>
                     
                     {/* Indicador de Seleção */}
                     {isSelected && (
                       <div className="flex-shrink-0">
-                        <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                        <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-primary flex items-center justify-center">
                           <div className="w-2 h-2 rounded-full bg-primary-text" />
                         </div>
                       </div>
@@ -214,7 +216,7 @@ export default function VariantSelectionModal({
               >
                 <button 
                   onClick={decrementQuantity}
-                  className="px-4 py-3 text-secondary-text hover:bg-[#2a1f1a] transition-colors font-bold text-lg"
+                  className="px-3 sm:px-4 py-2 sm:py-3 text-secondary-text hover:bg-[#2a1f1a] transition-colors font-bold text-base sm:text-lg"
                   style={{
                     fontFamily: "'Garamond', 'Palatino Linotype', 'Palatino', 'Times New Roman', serif"
                   }}
@@ -222,7 +224,7 @@ export default function VariantSelectionModal({
                   -
                 </button>
                 <span 
-                  className="px-6 py-3 text-secondary-text font-bold text-lg border-l border-r"
+                  className="px-4 sm:px-6 py-2 sm:py-3 text-secondary-text font-bold text-base sm:text-lg border-l border-r"
                   style={{
                     borderColor: '#DFA026',
                     fontFamily: "'Garamond', 'Palatino Linotype', 'Palatino', 'Times New Roman', serif"
@@ -232,7 +234,7 @@ export default function VariantSelectionModal({
                 </span>
                 <button 
                   onClick={incrementQuantity}
-                  className="px-4 py-3 text-secondary-text hover:bg-[#2a1f1a] transition-colors font-bold text-lg"
+                  className="px-3 sm:px-4 py-2 sm:py-3 text-secondary-text hover:bg-[#2a1f1a] transition-colors font-bold text-base sm:text-lg"
                   style={{
                     fontFamily: "'Garamond', 'Palatino Linotype', 'Palatino', 'Times New Roman', serif"
                   }}
@@ -246,7 +248,7 @@ export default function VariantSelectionModal({
             <button 
               onClick={handleAdd}
               disabled={!selectedVariant || !selectedVariant.available}
-              className="w-full px-4 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity uppercase flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity uppercase flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               style={{
                 background: 'linear-gradient(135deg, #e8a64a 0%, #d6891f 50%, #c77a1a 100%)',
                 color: '#2c1810',
@@ -256,7 +258,7 @@ export default function VariantSelectionModal({
                 boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0, 0, 0, 0.2)'
               }}
             >
-              <ShoppingCart className="w-5 h-5 flex-shrink-0" />
+              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <span>Adicionar ao Baú</span>
             </button>
           </div>

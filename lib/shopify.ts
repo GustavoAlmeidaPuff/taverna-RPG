@@ -114,6 +114,7 @@ export interface Product {
   description?: string;
   handle: string;
   variantId?: string; // ID da variante do produto no Shopify (necessário para checkout)
+  variantTitle?: string; // Título/nome da variante selecionada (para exibição no carrinho)
   shopifyProductId?: string; // ID do produto no Shopify (formato gid://shopify/Product/...)
   tags?: string; // Tags do produto (string separada por vírgulas)
   variants?: ProductVariant[]; // Array de variantes do produto

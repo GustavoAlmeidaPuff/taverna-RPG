@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Search, User, X, Gift, Trash2, Menu, Icon, LogOut } from 'lucide-react';
 import { chest } from '@lucide/lab';
-import { useCart } from '@/contexts/CartContext';
+import { useCart, getCartItemId } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Product } from '@/lib/shopify';
 import AuthModal from '@/components/AuthModal';
@@ -558,56 +558,65 @@ export default function Header() {
                     <p className="text-gray-400">Seu baú está vazio</p>
                   </div>
                 ) : (
-                  items.map((item) => (
-                    <div key={item.id} className="bg-[#2a1f1a] rounded-lg p-4 mb-4">
-                      <div className="flex gap-4">
-                        {/* Product Image */}
-                        <div className="w-20 h-20 rounded flex items-center justify-center flex-shrink-0 bg-gray-700 overflow-hidden">
-                          {item.image ? (
-                            <img 
-                              src={item.image} 
-                              alt={item.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 bg-gray-500 rounded-full"></div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          {/* Product Name */}
-                          <h3 className="text-white font-bold text-sm mb-1 uppercase">{item.name}</h3>
-                          {/* Product Price */}
-                          <p className="text-[#e8b430] font-bold text-lg mb-3">
-                            R$ {item.price.toFixed(2).replace('.', ',')}
-                          </p>
-                          {/* Quantity Controls */}
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center border border-gray-600 rounded">
+                  items.map((item) => {
+                    const cartItemId = getCartItemId(item);
+                    return (
+                      <div key={cartItemId} className="bg-[#2a1f1a] rounded-lg p-4 mb-4">
+                        <div className="flex gap-4">
+                          {/* Product Image */}
+                          <div className="w-20 h-20 rounded flex items-center justify-center flex-shrink-0 bg-gray-700 overflow-hidden">
+                            {item.image ? (
+                              <img 
+                                src={item.image} 
+                                alt={item.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 bg-gray-500 rounded-full"></div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            {/* Product Name */}
+                            <h3 className="text-white font-bold text-sm mb-1 uppercase">{item.name}</h3>
+                            {/* Variant Title */}
+                            {item.variantTitle && (
+                              <p className="text-[#e8b430] text-xs mb-1 font-semibold">
+                                Variante: {item.variantTitle}
+                              </p>
+                            )}
+                            {/* Product Price */}
+                            <p className="text-[#e8b430] font-bold text-lg mb-3">
+                              R$ {item.price.toFixed(2).replace('.', ',')}
+                            </p>
+                            {/* Quantity Controls */}
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center border border-gray-600 rounded">
+                                <button 
+                                  onClick={() => updateQuantity(cartItemId, item.quantity - 1)}
+                                  className="bg-[#201915] text-white px-3 py-1.5 hover:bg-[#2a1f1a] transition-colors"
+                                >
+                                  -
+                                </button>
+                                <span className="text-white px-4 py-1.5">{item.quantity}</span>
+                                <button 
+                                  onClick={() => updateQuantity(cartItemId, item.quantity + 1)}
+                                  className="bg-[#201915] text-white px-3 py-1.5 hover:bg-[#2a1f1a] transition-colors"
+                                >
+                                  +
+                                </button>
+                              </div>
                               <button 
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                className="bg-[#201915] text-white px-3 py-1.5 hover:bg-[#2a1f1a] transition-colors"
+                                onClick={() => removeItem(cartItemId)}
+                                className="ml-auto text-[#e8b430] hover:text-[#f0c855] transition-colors"
                               >
-                                -
-                              </button>
-                              <span className="text-white px-4 py-1.5">{item.quantity}</span>
-                              <button 
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                className="bg-[#201915] text-white px-3 py-1.5 hover:bg-[#2a1f1a] transition-colors"
-                              >
-                                +
+                                <Trash2 className="w-5 h-5" />
                               </button>
                             </div>
-                            <button 
-                              onClick={() => removeItem(item.id)}
-                              className="ml-auto text-[#e8b430] hover:text-[#f0c855] transition-colors"
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
 

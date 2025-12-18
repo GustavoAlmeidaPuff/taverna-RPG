@@ -82,7 +82,12 @@ export function CheckoutContent() {
                     
                     {/* Product Info */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-[#E0DEDC] font-bold mb-2 uppercase text-sm md:text-base">{item.name}</h3>
+                      <h3 className="text-[#E0DEDC] font-bold mb-1 uppercase text-sm md:text-base">{item.name}</h3>
+                      {item.variantTitle && (
+                        <p className="text-[#DFA026] text-xs md:text-sm mb-2 font-semibold">
+                          Variante: {item.variantTitle}
+                        </p>
+                      )}
                       <p className="text-[#DFA026] font-bold text-lg md:text-xl mb-3">
                         R$ {item.price.toFixed(2).replace('.', ',')}
                       </p>

@@ -41,6 +41,7 @@ export default function ProductActions({ product, selectedVariant }: ProductActi
       variantId: selectedVariant?.variantId || product.variantId,
       price: selectedVariant?.price || product.price,
       image: selectedVariant?.image || product.image,
+      variantTitle: selectedVariant?.title, // Salvar o título da variante se houver
     };
     
     for (let i = 0; i < quantity; i++) {
@@ -66,6 +67,7 @@ export default function ProductActions({ product, selectedVariant }: ProductActi
       variantId: variant.variantId,
       price: variant.price,
       image: variant.image || product.image,
+      variantTitle: variant.title, // Salvar o título da variante
     };
     
     for (let i = 0; i < variantQuantity; i++) {
