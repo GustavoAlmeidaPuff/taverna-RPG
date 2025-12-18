@@ -55,6 +55,13 @@ export default function ContaPage() {
   const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
   const [loadingFavorites, setLoadingFavorites] = useState(false);
 
+  // Verificar se o usuário fez login com email/senha (não Google)
+  const isEmailPasswordUser = () => {
+    if (!user || !user.providerData) return false;
+    // Verifica se há um provider de email/senha (password)
+    return user.providerData.some(provider => provider.providerId === 'password');
+  };
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/');
@@ -63,9 +70,13 @@ export default function ContaPage() {
 
     if (user) {
       loadUserData();
+      // Se o usuário não for de email/senha e estiver na aba 'senha', redireciona para 'dados'
+      if (activeTab === 'senha' && !isEmailPasswordUser()) {
+        setActiveTab('dados');
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, activeTab]);
 
   // Recarregar produtos favoritos quando userData.favorites mudar
   useEffect(() => {
@@ -336,19 +347,21 @@ export default function ContaPage() {
               <span className="text-sm md:text-base">Favoritos</span>
             </div>
           </button>
-          <button
-            onClick={() => setActiveTab('senha')}
-            className={`px-4 md:px-6 py-2 md:py-3 font-semibold transition-colors border-b-2 ${
-              activeTab === 'senha'
-                ? 'text-primary border-primary'
-                : 'text-secondary-text border-transparent hover:text-primary'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="text-sm md:text-base">Alterar Senha</span>
-            </div>
-          </button>
+          {isEmailPasswordUser() && (
+            <button
+              onClick={() => setActiveTab('senha')}
+              className={`px-4 md:px-6 py-2 md:py-3 font-semibold transition-colors border-b-2 ${
+                activeTab === 'senha'
+                  ? 'text-primary border-primary'
+                  : 'text-secondary-text border-transparent hover:text-primary'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Lock className="w-4 h-4 md:w-5 md:h-5" />
+                <span className="text-sm md:text-base">Alterar Senha</span>
+              </div>
+            </button>
+          )}
         </div>
 
         {/* Conteúdo das tabs */}
@@ -590,7 +603,7 @@ export default function ContaPage() {
             </div>
           )}
 
-          {activeTab === 'senha' && (
+          {activeTab === 'senha' && isEmailPasswordUser() && (
             <div className="space-y-6">
               <h3 className="text-xl md:text-2xl font-bold text-secondary-text mb-6">Alterar Senha</h3>
               
