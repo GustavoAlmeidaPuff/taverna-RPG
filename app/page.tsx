@@ -33,8 +33,8 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  // Buscar produtos reais do Shopify
-  const products = await getAllProducts(20);
+  // Buscar produtos reais do Shopify (limite aumentado para 100)
+  const products = await getAllProducts(100);
   
   // Dividir produtos em duas seções (novos e mais vendidos)
   // Como tem apenas 1 produto, vamos mostrar o mesmo produto nas duas seções

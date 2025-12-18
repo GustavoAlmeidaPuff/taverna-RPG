@@ -271,7 +271,7 @@ const STOREFRONT_PRODUCTS_QUERY = `
 `;
 
 // Buscar todos os produtos via Storefront API (para ter IDs compatíveis com checkout)
-export async function getAllProducts(limit: number = 20): Promise<Product[]> {
+export async function getAllProducts(limit: number = 100): Promise<Product[]> {
   try {
     // Usa Storefront API para garantir IDs compatíveis
     const data = await storefrontApiRequest(STOREFRONT_PRODUCTS_QUERY, {
@@ -279,6 +279,8 @@ export async function getAllProducts(limit: number = 20): Promise<Product[]> {
     });
     
     const products = data.products?.edges || [];
+    console.log(`📦 ${products.length} produtos encontrados no Shopify`);
+    
     return products.map((edge: any) => {
       const p = edge.node;
       const allImages = (p.images?.edges || []).map((img: any) => img.node.url).filter(Boolean);
@@ -567,14 +569,25 @@ export async function createCheckout(lineItems: CheckoutLineItem[]): Promise<Che
     console.log('Validação de variantes - válidas:', valid, 'inválidas:', invalid);
 
     if (invalid.length > 0) {
-      const invalidProductNames = invalid.map(id => {
-        const item = formattedLineItems.find(i => i.merchandiseId === id);
-        return item?.originalId || id;
-      }).join(', ');
+      const invalidDetails = invalid.map(id => {
+        const item = lineItems.find(i => {
+          const variantId = i.variantId.startsWith('gid://') 
+            ? i.variantId 
+            : `gid://shopify/ProductVariant/${i.variantId}`;
+          return variantId === id;
+        });
+        return {
+          variantId: id,
+          originalId: item?.variantId || id
+        };
+      });
+      
+      console.error('Variantes inválidas detalhadas:', invalidDetails);
       
       throw new Error(
-        `Os seguintes produtos não estão disponíveis no momento: ${invalidProductNames}. ` +
-        `Por favor, remova-os do carrinho e tente novamente.`
+        `Alguns produtos no carrinho não estão mais disponíveis ou foram removidos da loja. ` +
+        `IDs problemáticos: ${invalidDetails.map(d => d.originalId).join(', ')}. ` +
+        `Por favor, limpe seu carrinho e adicione os produtos novamente.`
       );
     }
 

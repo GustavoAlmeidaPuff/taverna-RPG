@@ -44,30 +44,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  // Carregar carrinho do Firestore
-  const loadCart = async (userId: string) => {
-    if (!db) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const cartRef = doc(db, 'users', userId, 'cart', 'current');
-      const cartSnap = await getDoc(cartRef);
-      
-      if (cartSnap.exists()) {
-        const cartData = cartSnap.data();
-        setItems(cartData.items || []);
-      } else {
-        setItems([]);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar carrinho:', error);
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Salvar carrinho no Firestore
   const saveCart = async (cartItems: CartItem[]) => {
@@ -84,14 +60,91 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Carregar carrinho quando usuário fizer login
-  useEffect(() => {
-    if (user && db) {
-      loadCart(user.uid);
-    } else {
-      setItems([]);
-      setLoading(false);
+  // Validar e atualizar IDs de variantes se necessário
+  const validateAndUpdateCart = async (cartItems: CartItem[]) => {
+    if (!user || !db) return cartItems;
+
+    let needsUpdate = false;
+    const updatedItems: CartItem[] = [];
+
+    for (const item of cartItems) {
+      // Se o variantId não está no formato GID, precisa ser atualizado
+      if (item.variantId && !item.variantId.startsWith('gid://')) {
+        console.log(`Produto ${item.name} tem ID antigo: ${item.variantId}. Buscando produto atualizado...`);
+        
+        try {
+          // Buscar produto atualizado usando o handle
+          const response = await fetch(`/api/products/${item.handle}`);
+          if (response.ok) {
+            const data = await response.json();
+            const updatedProduct = data.product;
+            
+            if (updatedProduct && updatedProduct.variantId) {
+              console.log(`Produto ${item.name} atualizado com novo ID: ${updatedProduct.variantId}`);
+              updatedItems.push({
+                ...item,
+                variantId: updatedProduct.variantId,
+                shopifyProductId: updatedProduct.shopifyProductId,
+              });
+              needsUpdate = true;
+            } else {
+              console.warn(`Produto ${item.name} não encontrado, mantendo no carrinho`);
+              updatedItems.push(item);
+            }
+          } else {
+            console.warn(`Erro ao buscar produto ${item.name}, mantendo no carrinho`);
+            updatedItems.push(item);
+          }
+        } catch (error) {
+          console.error(`Erro ao validar produto ${item.name}:`, error);
+          updatedItems.push(item);
+        }
+      } else {
+        updatedItems.push(item);
+      }
     }
+
+    // Se houve atualizações, salvar o carrinho atualizado
+    if (needsUpdate) {
+      console.log('Carrinho atualizado com novos IDs');
+      await saveCart(updatedItems);
+      return updatedItems;
+    }
+
+    return cartItems;
+  };
+
+  // Carregar e validar carrinho quando usuário fizer login
+  useEffect(() => {
+    const loadAndValidateCart = async () => {
+      if (user && db) {
+        try {
+          const cartRef = doc(db, 'users', user.uid, 'cart', 'current');
+          const cartSnap = await getDoc(cartRef);
+          
+          if (cartSnap.exists()) {
+            const cartData = cartSnap.data();
+            const loadedItems = cartData.items || [];
+            
+            // Validar e atualizar IDs se necessário
+            const validatedItems = await validateAndUpdateCart(loadedItems);
+            setItems(validatedItems);
+          } else {
+            setItems([]);
+          }
+        } catch (error) {
+          console.error('Erro ao carregar carrinho:', error);
+          setItems([]);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setItems([]);
+        setLoading(false);
+      }
+    };
+
+    loadAndValidateCart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
