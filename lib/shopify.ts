@@ -276,6 +276,55 @@ export async function getProductById(id: string): Promise<Product | null> {
   return getProductByHandle(id);
 }
 
+// Buscar múltiplos produtos por IDs (tenta como handle primeiro, depois como ID numérico)
+export async function getProductsByIds(ids: string[]): Promise<Product[]> {
+  if (ids.length === 0) return [];
+  
+  const products: Product[] = [];
+  
+  // Buscar produtos em paralelo
+  const promises = ids.map(async (id) => {
+    try {
+      // Primeiro tenta como handle
+      let product = await getProductByHandle(id);
+      
+      // Se não encontrou, tenta como ID numérico via Admin API
+      if (!product) {
+        try {
+          const data = await adminApiRequest(`products/${id}.json`);
+          const p = data.product;
+          if (p) {
+            const allImages = (p.images || []).map((img: any) => img.src).filter(Boolean);
+            const variant = p.variants?.[0];
+            product = {
+              id: p.id.toString(),
+              name: p.title,
+              price: parseFloat(variant?.price || '0'),
+              image: allImages[0] || '',
+              images: allImages.length > 1 ? allImages : undefined,
+              description: p.body_html || '',
+              handle: p.handle,
+              variantId: variant?.id?.toString(),
+              shopifyProductId: `gid://shopify/Product/${p.id}`,
+              tags: p.tags || '',
+            };
+          }
+        } catch (error) {
+          console.error(`Erro ao buscar produto por ID ${id}:`, error);
+        }
+      }
+      
+      return product;
+    } catch (error) {
+      console.error(`Erro ao buscar produto ${id}:`, error);
+      return null;
+    }
+  });
+  
+  const results = await Promise.all(promises);
+  return results.filter((p): p is Product => p !== null);
+}
+
 // Interface para itens do checkout
 export interface CheckoutLineItem {
   variantId: string;

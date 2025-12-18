@@ -10,6 +10,7 @@ import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { getProductsByIds, Product } from '@/lib/shopify';
 import { 
   User, 
   Lock, 
@@ -19,7 +20,8 @@ import {
   ArrowLeft,
   Edit2,
   Check,
-  X
+  X,
+  ShoppingCart
 } from 'lucide-react';
 import { chest } from '@lucide/lab';
 import { Icon } from 'lucide-react';
@@ -35,8 +37,8 @@ interface UserData {
 
 export default function ContaPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
-  const { getItemCount } = useCart();
+  const { user, loading: authLoading, isFavorite, removeFavorite } = useAuth();
+  const { getItemCount, addItem } = useCart();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<any[]>([]);
@@ -50,6 +52,8 @@ export default function ContaPage() {
   });
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -62,6 +66,16 @@ export default function ContaPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading, router]);
+
+  // Recarregar produtos favoritos quando userData.favorites mudar
+  useEffect(() => {
+    if (userData?.favorites && userData.favorites.length > 0) {
+      loadFavoriteProducts(userData.favorites);
+    } else if (userData?.favorites && userData.favorites.length === 0) {
+      setFavoriteProducts([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData?.favorites]);
 
   const loadUserData = async () => {
     if (!user || !db) return;
@@ -99,6 +113,24 @@ export default function ContaPage() {
       console.error('Erro ao carregar dados do usuário:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadFavoriteProducts = async (favoriteIds: string[]) => {
+    if (favoriteIds.length === 0) {
+      setFavoriteProducts([]);
+      return;
+    }
+
+    try {
+      setLoadingFavorites(true);
+      const products = await getProductsByIds(favoriteIds);
+      setFavoriteProducts(products);
+    } catch (error) {
+      console.error('Erro ao carregar produtos favoritos:', error);
+      setFavoriteProducts([]);
+    } finally {
+      setLoadingFavorites(false);
     }
   };
 
@@ -438,12 +470,107 @@ export default function ContaPage() {
                     <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
+              ) : loadingFavorites ? (
+                <div className="text-center py-12">
+                  <p className="text-secondary-text">Carregando produtos favoritos...</p>
+                </div>
+              ) : favoriteProducts.length === 0 && userData?.favorites && userData.favorites.length > 0 ? (
+                <div className="text-center py-12">
+                  <Heart className="w-16 h-16 text-secondary-text/30 mx-auto mb-4" />
+                  <p className="text-secondary-text mb-2">Não foi possível carregar os produtos favoritos</p>
+                </div>
               ) : (
                 <div className="space-y-4">
-                  {/* TODO: Listar produtos favoritos quando houver integração com produtos */}
-                  <p className="text-secondary-text">
-                    Você tem {userData?.favorites?.length || 0} produto{userData?.favorites?.length !== 1 ? 's' : ''} favoritado{userData?.favorites?.length !== 1 ? 's' : ''}.
+                  <p className="text-secondary-text mb-4">
+                    Você tem {favoriteProducts.length} produto{favoriteProducts.length !== 1 ? 's' : ''} favoritado{favoriteProducts.length !== 1 ? 's' : ''}.
                   </p>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    {favoriteProducts.map((product) => (
+                      <Link
+                        key={product.id}
+                        href={`/produto/${product.handle}`}
+                        className="block rounded-lg overflow-hidden relative group cursor-pointer"
+                        style={{ 
+                          backgroundColor: '#1d1816', 
+                          border: '0.5px solid #DFA026',
+                          boxShadow: '0 0 8px rgba(223, 160, 38, 0.2)',
+                          transition: 'box-shadow 0.3s ease'
+                        }}
+                      >
+                        {/* Badge */}
+                        {product.badge && (
+                          <div className={`absolute top-2 left-2 z-10 px-2 py-1 rounded text-xs font-bold ${
+                            product.badge === 'oferta' || product.discount
+                              ? 'bg-destructive text-destructive-text'
+                              : 'bg-primary text-primary-text'
+                          }`}>
+                            {product.badge === 'oferta' && product.discount ? `OFERTA -${product.discount}%` : 
+                             product.badge === 'novo' ? 'NOVO' :
+                             product.badge === 'lançamento' ? 'LANÇAMENTO' :
+                             product.discount ? `-${product.discount}%` : ''}
+                          </div>
+                        )}
+
+                        {/* Imagem do produto */}
+                        <div className="h-48 md:h-64 relative overflow-hidden">
+                          <img
+                            src={product.image || '/images/placeholder.png'}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+
+                          {/* Action Buttons */}
+                          <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (isFavorite(product.id)) {
+                                  removeFavorite(product.id);
+                                  setFavoriteProducts(prev => prev.filter(p => p.id !== product.id));
+                                }
+                              }}
+                              className="w-10 h-10 bg-card border border-primary bg-primary rounded-full items-center justify-center flex"
+                            >
+                              <Heart className="w-5 h-5 text-primary-text fill-current" />
+                            </button>
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                addItem(product);
+                              }}
+                              className="bg-primary text-primary-text px-4 py-2 rounded-full text-sm font-bold flex items-center gap-1 hover:opacity-90 transition-opacity"
+                            >
+                              <ShoppingCart className="w-4 h-4" />
+                              <span className="hidden md:inline">Adicionar</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="p-4">
+                          <h3 className="text-card-text font-bold mb-2 hover:text-primary transition-colors uppercase text-sm leading-tight line-clamp-2">
+                            {product.name}
+                          </h3>
+                          
+                          <div className="flex flex-col md:flex-row md:items-center gap-2 mb-1">
+                            {product.originalPrice && (
+                              <span className="text-muted-text line-through text-sm">
+                                de R$ {product.originalPrice.toFixed(2).replace('.', ',')}
+                              </span>
+                            )}
+                            <span className="text-primary font-bold text-lg">
+                              R$ {product.price.toFixed(2).replace('.', ',')}
+                            </span>
+                          </div>
+                          <p className="text-muted-text text-sm">
+                            ou 12x de R$ {(product.price / 12).toFixed(2).replace('.', ',')} sem juros
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
