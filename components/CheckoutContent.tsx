@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCart, getCartItemId } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { Trash2, Gift, Loader2 } from 'lucide-react';
+import { Trash2, Loader2 } from 'lucide-react';
 import AuthModal from '@/components/AuthModal';
 
 export function CheckoutContent() {
@@ -148,15 +148,6 @@ export function CheckoutContent() {
                 </span>
               </div>
             </div>
-
-            {!hasFreeShipping && (
-              <div className="flex items-center gap-2 text-[#E0DEDC] text-sm mb-6 p-3 bg-[#1a140f] rounded-lg">
-                <Gift className="text-[#DFA026] w-4 h-4 flex-shrink-0" />
-                <span>
-                  Faltam <span className="text-[#DFA026] font-semibold">R$ {(250 - total).toFixed(2).replace('.', ',')}</span> para frete grátis
-                </span>
-              </div>
-            )}
 
             <div className="mb-6">
               <div className="flex justify-between items-center">
