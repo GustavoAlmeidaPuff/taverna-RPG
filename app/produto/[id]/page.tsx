@@ -5,6 +5,60 @@ import { getProductByHandle } from '@/lib/shopify';
 import { notFound } from 'next/navigation';
 import ProductDescription from '@/components/ProductDescription';
 import ProductDetailContent from '@/components/ProductDetailContent';
+import type { Metadata } from 'next';
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://taverna-rpg-store.vercel.app';
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const product = await getProductByHandle(params.id);
+  
+  if (!product) {
+    return {
+      title: 'Produto não encontrado',
+    };
+  }
+
+  const productUrl = `${siteUrl}/produto/${product.handle}`;
+  const productImage = product.image || `${siteUrl}/images/logo.png`;
+  const productDescription = product.description 
+    ? product.description.replace(/<[^>]*>/g, '').substring(0, 160)
+    : `Confira ${product.name} na Taverna RPG Store. Dados, miniaturas e acessórios para suas aventuras épicas!`;
+  const price = product.originalPrice || product.price;
+  const currency = 'BRL';
+
+  return {
+    title: product.name,
+    description: productDescription,
+    openGraph: {
+      type: 'website',
+      url: productUrl,
+      title: product.name,
+      description: productDescription,
+      images: [
+        {
+          url: productImage,
+          width: 1200,
+          height: 630,
+          alt: product.name,
+        },
+      ],
+      siteName: 'Taverna RPG Store',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: product.name,
+      description: productDescription,
+      images: [productImage],
+    },
+    alternates: {
+      canonical: productUrl,
+    },
+    other: {
+      'product:price:amount': price.toFixed(2),
+      'product:price:currency': currency,
+    },
+  };
+}
 
 export default async function ProductDetail({ params }: { params: { id: string } }) {
   // Buscar produto real do Shopify usando o handle
@@ -21,10 +75,48 @@ export default async function ProductDetail({ params }: { params: { id: string }
   const rating = 5;
   const reviews = 0;
 
+  // Structured Data (JSON-LD) para SEO
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: description.replace(/<[^>]*>/g, '').substring(0, 500),
+    image: product.image ? [product.image] : [`${siteUrl}/images/logo.png`],
+    sku: product.id,
+    brand: {
+      '@type': 'Brand',
+      name: 'Taverna RPG Store',
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `${siteUrl}/produto/${product.handle}`,
+      priceCurrency: 'BRL',
+      price: product.price.toFixed(2),
+      availability: 'https://schema.org/InStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'Taverna RPG Store',
+      },
+    },
+    ...(reviews > 0 && {
+      aggregateRating: {
+        '@type': 'AggregateRating',
+        ratingValue: rating,
+        reviewCount: reviews,
+      },
+    }),
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 bg-background">
+        {/* Structured Data para o produto */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        />
+        
         <div className="container mx-auto px-4 py-8">
           {/* Back Link */}
           <Link href="/" className="text-secondary-text hover:text-primary mb-6 inline-block">

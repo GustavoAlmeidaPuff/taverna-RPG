@@ -392,41 +392,114 @@ export default function Header() {
         </div>
 
         {/* Navigation Bar - Marrom escuro (Secondary) */}
-        <nav className="bg-secondary border-t border-border hidden md:block">
+        <nav 
+          className="hidden md:block"
+          style={{
+            backgroundColor: '#2d2621',
+            borderTop: '1px solid #59514c',
+            borderBottom: '1px solid #59514c'
+          }}
+        >
           <div className="container mx-auto px-4">
             <ul className="flex items-center justify-center gap-8 py-3">
               <li>
-                <Link href="#" className="flex items-center gap-2 text-secondary-text hover:text-primary transition-colors">
+                <Link 
+                  href="#" 
+                  className="flex items-center gap-2 transition-colors"
+                  style={{
+                    fontFamily: 'var(--font-cinzel), serif',
+                    color: '#dcdcdc',
+                    fontSize: '14px',
+                    fontWeight: 400,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
                   <span>⚔️</span>
                   <span>Miniaturas</span>
                 </Link>
               </li>
               <li>
-                <Link href="#" className="flex items-center gap-2 text-secondary-text hover:text-primary transition-colors">
+                <Link 
+                  href="#" 
+                  className="flex items-center gap-2 transition-colors"
+                  style={{
+                    fontFamily: 'var(--font-cinzel), serif',
+                    color: '#dcdcdc',
+                    fontSize: '14px',
+                    fontWeight: 400,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
                   <span>🎲</span>
                   <span>Dados de RPG</span>
                 </Link>
               </li>
               <li>
-                <Link href="#" className="flex items-center gap-2 text-secondary-text hover:text-primary transition-colors">
+                <Link 
+                  href="#" 
+                  className="flex items-center gap-2 transition-colors"
+                  style={{
+                    fontFamily: 'var(--font-cinzel), serif',
+                    color: '#dcdcdc',
+                    fontSize: '14px',
+                    fontWeight: 400,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
                   <span>🗺️</span>
                   <span>Grids e Mapas</span>
                 </Link>
               </li>
               <li>
-                <Link href="#" className="flex items-center gap-2 text-secondary-text hover:text-primary transition-colors">
+                <Link 
+                  href="#" 
+                  className="flex items-center gap-2 transition-colors"
+                  style={{
+                    fontFamily: 'var(--font-cinzel), serif',
+                    color: '#dcdcdc',
+                    fontSize: '14px',
+                    fontWeight: 400,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
                   <span>🏰</span>
                   <span>Cenários</span>
                 </Link>
               </li>
               <li>
-                <Link href="#" className="flex items-center gap-2 text-secondary-text hover:text-primary transition-colors">
+                <Link 
+                  href="#" 
+                  className="flex items-center gap-2 transition-colors"
+                  style={{
+                    fontFamily: 'var(--font-cinzel), serif',
+                    color: '#dcdcdc',
+                    fontSize: '14px',
+                    fontWeight: 400,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
                   <span>📖</span>
                   <span>Livros</span>
                 </Link>
               </li>
               <li>
-                <Link href="#" className="flex items-center gap-2 text-secondary-text hover:text-primary transition-colors">
+                <Link 
+                  href="#" 
+                  className="flex items-center gap-2 transition-colors"
+                  style={{
+                    fontFamily: 'var(--font-cinzel), serif',
+                    color: '#dcdcdc',
+                    fontSize: '14px',
+                    fontWeight: 400,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}
+                >
                   <span>🎭</span>
                   <span>Acessórios</span>
                 </Link>

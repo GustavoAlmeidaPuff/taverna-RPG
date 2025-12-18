@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /conta/
+Disallow: /checkout/
+Disallow: /busca
+
+# Sitemap
+Sitemap: https://taverna-rpg-store.vercel.app/sitemap.xml
