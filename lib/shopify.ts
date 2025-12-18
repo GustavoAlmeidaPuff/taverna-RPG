@@ -106,6 +106,7 @@ export interface Product {
   handle: string;
   variantId?: string; // ID da variante do produto no Shopify (necessário para checkout)
   shopifyProductId?: string; // ID do produto no Shopify (formato gid://shopify/Product/...)
+  tags?: string; // Tags do produto (string separada por vírgulas)
 }
 
 // Query GraphQL para buscar todos os produtos
@@ -229,6 +230,7 @@ export async function getAllProducts(limit: number = 20): Promise<Product[]> {
         handle: p.handle,
         variantId: variant?.id?.toString(), // ID da variante para checkout
         shopifyProductId: `gid://shopify/Product/${p.id}`, // ID no formato GraphQL
+        tags: p.tags || '', // Tags do produto
       };
     });
   } catch (error) {
@@ -259,6 +261,7 @@ export async function getProductByHandle(handle: string): Promise<Product | null
       handle: product.handle,
       variantId: variant?.id?.toString(), // ID da variante para checkout
       shopifyProductId: `gid://shopify/Product/${product.id}`, // ID no formato GraphQL
+      tags: product.tags || '', // Tags do produto
     };
   } catch (error) {
     console.error('Erro ao buscar produto do Shopify:', error);

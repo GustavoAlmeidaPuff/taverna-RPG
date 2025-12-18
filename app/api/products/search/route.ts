@@ -17,11 +17,12 @@ export async function GET(request: Request) {
     const normalizedQuery = query.toLowerCase().trim();
     const queryWords = normalizedQuery.split(/\s+/).filter(word => word.length > 0);
     
-    // Filtrar produtos que contenham as palavras-chave no nome ou descrição
+    // Filtrar produtos que contenham as palavras-chave no nome, descrição ou tags
     const filteredProducts = allProducts.filter(product => {
       const name = (product.name || '').toLowerCase();
       const description = (product.description || '').toLowerCase();
-      const searchText = `${name} ${description}`;
+      const tags = (product.tags || '').toLowerCase();
+      const searchText = `${name} ${description} ${tags}`;
       
       // Verifica se todas as palavras da query estão presentes
       return queryWords.every(word => searchText.includes(word));

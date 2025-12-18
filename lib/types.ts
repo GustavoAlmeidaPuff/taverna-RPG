@@ -11,6 +11,7 @@ export interface Product {
   images?: string[];
   description?: string;
   handle: string;
+  tags?: string; // Tags do produto (string separada por vírgulas)
 }
 
 export interface ProductDetail extends Product {
