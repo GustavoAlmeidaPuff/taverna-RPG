@@ -88,17 +88,50 @@ window.location.href = checkout.checkoutUrl;
 
 ## Configuração do Shopify Payments
 
-Para que o pagamento funcione corretamente:
+Para que o pagamento funcione corretamente, você precisa configurar a loja para receber pedidos:
 
-1. **Configure o Shopify Payments** na sua loja:
-   - Acesse **Configurações** > **Pagamentos** no admin do Shopify
-   - Configure o Shopify Payments (ou outro gateway de pagamento)
-   - Certifique-se de que está ativo e configurado
+### 1. Configurar Gateway de Pagamento
 
-2. **Teste o checkout**:
-   - Use o modo de teste do Shopify para testar sem processar pagamentos reais
-   - No admin do Shopify, vá em **Configurações** > **Pagamentos**
-   - Ative o modo de teste para testar o fluxo completo
+1. Acesse o **Admin do Shopify** (admin.shopify.com)
+2. Vá em **Configurações** (Settings) no canto inferior esquerdo
+3. Clique em **Pagamentos** (Payments)
+4. Escolha uma das opções:
+   
+   **Opção A - Shopify Payments (Recomendado):**
+   - Clique em **Ativar Shopify Payments** ou **Configurar**
+   - Preencha as informações da sua conta comercial
+   - Adicione informações bancárias para receber pagamentos
+   - Complete a verificação de identidade (se solicitado)
+   
+   **Opção B - Gateway de Teste (Para desenvolvimento):**
+   - Role até **Gateway de pagamento de teste**
+   - Ative o **Bogus Gateway (for testing)**
+   - Isso permite testar o checkout sem processar pagamentos reais
+
+### 2. Configurar Envio/Frete
+
+1. No Admin do Shopify, vá em **Configurações** > **Envio e entrega** (Shipping and delivery)
+2. Configure pelo menos um método de envio:
+   - **Envio grátis** (se aplicável)
+   - **Taxa fixa**
+   - **Taxa calculada** (baseada em peso/dimensões)
+3. Defina as zonas de envio (países/regiões atendidas)
+
+### 3. Verificar Configurações da Loja
+
+1. Vá em **Configurações** > **Geral**
+2. Verifique se:
+   - O endereço da loja está preenchido
+   - O email de contato está configurado
+   - A moeda está definida corretamente
+
+### 4. Testar o Checkout
+
+Após configurar:
+- Use o **Bogus Gateway** para testar sem processar pagamentos reais
+- Ou configure o **Shopify Payments** com dados reais (após verificação)
+
+**Nota:** Se você está em desenvolvimento/teste, use o **Bogus Gateway** para evitar processar pagamentos reais durante os testes.
 
 ## Funcionalidades Implementadas
 

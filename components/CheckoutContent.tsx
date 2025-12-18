@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
-import { Trash2, Gift } from 'lucide-react';
+import { Trash2, Gift, Loader2 } from 'lucide-react';
 import AuthModal from '@/components/AuthModal';
 
 export function CheckoutContent() {

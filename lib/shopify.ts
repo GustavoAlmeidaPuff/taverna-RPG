@@ -285,32 +285,33 @@ export interface CheckoutResponse {
   checkoutId: string;
 }
 
-// Mutation GraphQL para criar checkout
-const CREATE_CHECKOUT_MUTATION = `
-  mutation checkoutCreate($input: CheckoutCreateInput!) {
-    checkoutCreate(input: $input) {
-      checkout {
+// Mutation GraphQL para criar carrinho (Cart API)
+const CREATE_CART_MUTATION = `
+  mutation cartCreate($input: CartInput!) {
+    cartCreate(input: $input) {
+      cart {
         id
-        webUrl
-        lineItems(first: 250) {
+        checkoutUrl
+        lines(first: 250) {
           edges {
             node {
               id
-              title
               quantity
-              variant {
-                id
-                title
-                price {
-                  amount
-                  currencyCode
+              merchandise {
+                ... on ProductVariant {
+                  id
+                  title
+                  price {
+                    amount
+                    currencyCode
+                  }
                 }
               }
             }
           }
         }
       }
-      checkoutUserErrors {
+      userErrors {
         field
         message
       }
@@ -318,7 +319,7 @@ const CREATE_CHECKOUT_MUTATION = `
   }
 `;
 
-// Criar checkout no Shopify
+// Criar checkout no Shopify usando Cart API
 export async function createCheckout(lineItems: CheckoutLineItem[]): Promise<CheckoutResponse> {
   try {
     // Converter variant IDs para o formato GraphQL (gid://shopify/ProductVariant/...)
@@ -331,33 +332,33 @@ export async function createCheckout(lineItems: CheckoutLineItem[]): Promise<Che
       }
       
       return {
-        variantId,
+        merchandiseId: variantId,
         quantity: item.quantity,
       };
     });
 
-    const data = await storefrontApiRequest(CREATE_CHECKOUT_MUTATION, {
+    const data = await storefrontApiRequest(CREATE_CART_MUTATION, {
       input: {
-        lineItems: formattedLineItems,
+        lines: formattedLineItems,
       },
     });
 
-    if (data.checkoutCreate.checkoutUserErrors?.length > 0) {
-      const errors = data.checkoutCreate.checkoutUserErrors
+    if (data.cartCreate.userErrors?.length > 0) {
+      const errors = data.cartCreate.userErrors
         .map((e: any) => `${e.field}: ${e.message}`)
         .join(', ');
-      throw new Error(`Erro ao criar checkout: ${errors}`);
+      throw new Error(`Erro ao criar carrinho: ${errors}`);
     }
 
-    const checkout = data.checkoutCreate.checkout;
+    const cart = data.cartCreate.cart;
     
-    if (!checkout || !checkout.webUrl) {
-      throw new Error('Checkout criado mas URL não retornada');
+    if (!cart || !cart.checkoutUrl) {
+      throw new Error('Carrinho criado mas URL de checkout não retornada');
     }
 
     return {
-      checkoutUrl: checkout.webUrl,
-      checkoutId: checkout.id,
+      checkoutUrl: cart.checkoutUrl,
+      checkoutId: cart.id,
     };
   } catch (error) {
     console.error('Erro ao criar checkout do Shopify:', error);
