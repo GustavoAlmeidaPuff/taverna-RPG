@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getProductsByIds } from '@/lib/shopify';
 
+// Forçar rota dinâmica
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();

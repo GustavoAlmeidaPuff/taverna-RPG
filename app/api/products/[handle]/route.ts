@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getProductByHandle } from '@/lib/shopify';
 
+// Forçar rota dinâmica
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: Request,
   { params }: { params: { handle: string } }

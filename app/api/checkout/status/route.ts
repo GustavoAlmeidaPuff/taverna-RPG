@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Forçar rota dinâmica
+export const dynamic = 'force-dynamic';
+
 // Helper para fazer requisições à Storefront API
 async function storefrontApiRequest(query: string, variables: any = {}) {
   const storeDomain = process.env.SHOPIFY_STORE_DOMAIN!;

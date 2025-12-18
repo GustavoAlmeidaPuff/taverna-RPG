@@ -1,6 +1,10 @@
 import { MetadataRoute } from 'next';
 import { getAllProducts } from '@/lib/shopify';
 
+// Forçar geração dinâmica do sitemap
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // Revalidar a cada hora
+
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://taverna-rpg-store.vercel.app';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -27,8 +31,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
   } catch (error) {
-    console.error('Erro ao gerar sitemap de produtos:', error);
+    console.error('Erro ao buscar produtos do Shopify:', error);
     // Continua sem produtos se houver erro
+    // Isso permite que o sitemap seja gerado mesmo se a API do Shopify estiver indisponível
   }
 
   return [...staticPages, ...productPages];
