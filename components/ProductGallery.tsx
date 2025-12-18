@@ -19,6 +19,11 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
   const allImages = images && images.length > 0 ? images : ['/images/placeholder.png'];
   const currentImage = allImages[selectedIndex];
 
+  // Debug - remover depois
+  console.log('ProductGallery - allImages:', allImages);
+  console.log('ProductGallery - currentImage:', currentImage);
+  console.log('ProductGallery - selectedIndex:', selectedIndex);
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isZoomed) return;
     
@@ -61,7 +66,7 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
+    <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 w-full">
       {/* Miniaturas Verticais (apenas se tiver mais de uma imagem) - Desktop */}
       {allImages.length > 1 && (
         <div className="hidden lg:flex flex-col gap-2 flex-shrink-0">
@@ -90,9 +95,10 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
       )}
 
       {/* Imagem Principal com Zoom */}
-      <div className="flex-1">
+      <div className="flex-1 w-full min-w-0" style={{ backgroundColor: '#1a1612' }}>
         <div
-          className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] rounded-lg overflow-hidden bg-card cursor-zoom-in touch-none"
+          className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] rounded-lg overflow-hidden cursor-zoom-in touch-none"
+          style={{ backgroundColor: '#2a2420', border: '2px solid #d4af37' }}
           onMouseEnter={() => setIsZoomed(true)}
           onMouseLeave={() => {
             setIsZoomed(false);
@@ -103,16 +109,26 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          <div
-            className="w-full h-full bg-cover bg-center transition-all duration-300 ease-out"
-            style={{
-              backgroundImage: `url(${currentImage})`,
-              backgroundSize: isZoomed ? '250%' : 'cover',
-              backgroundPosition: isZoomed 
-                ? `${mousePosition.x}% ${mousePosition.y}%` 
-                : 'center',
-            }}
-          />
+          {currentImage && (
+            <img
+              src={currentImage}
+              alt={productName}
+              className="block w-full h-full object-contain"
+              style={{
+                transform: isZoomed 
+                  ? `scale(2.5) translate(${(50 - mousePosition.x) * 0.4}%, ${(50 - mousePosition.y) * 0.4}%)` 
+                  : 'scale(1)',
+                transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`,
+                transition: isZoomed ? 'none' : 'transform 0.3s ease-out',
+                display: 'block',
+              }}
+              onError={(e) => {
+                console.error('Erro ao carregar imagem:', currentImage);
+                e.currentTarget.style.display = 'none';
+              }}
+              onLoad={() => console.log('Imagem carregada com sucesso:', currentImage)}
+            />
+          )}
           
           {/* Badge */}
           {badge && (
@@ -152,3 +168,4 @@ export default function ProductGallery({ images, badge, productName }: ProductGa
     </div>
   );
 }
+

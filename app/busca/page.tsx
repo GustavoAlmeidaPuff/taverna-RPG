@@ -65,7 +65,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 </h1>
                 {query && (
                   <p className="text-secondary-text text-lg">
-                    Buscando por: <span className="text-primary font-semibold">"{query}"</span>
+                    Buscando por: <span className="text-primary font-semibold">&quot;{query}&quot;</span>
                   </p>
                 )}
               </div>
@@ -96,7 +96,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 Nenhum produto encontrado
               </h2>
               <p className="text-muted-text mb-6">
-                Não encontramos produtos para "{query}"
+                Não encontramos produtos para &quot;{query}&quot;
               </p>
               <Link
                 href="/"

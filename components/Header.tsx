@@ -204,7 +204,7 @@ export default function Header() {
                                 type="submit"
                                 className="w-full text-center text-[#DFA026] hover:text-[#E0B64D] transition-colors text-sm font-semibold"
                               >
-                                Ver todos os resultados para "{searchQuery}"
+                                Ver todos os resultados para &quot;{searchQuery}&quot;
                               </button>
                             </div>
                           )}
@@ -303,7 +303,7 @@ export default function Header() {
                               type="submit"
                               className="w-full text-center text-[#DFA026] hover:text-[#E0B64D] transition-colors text-sm font-semibold"
                             >
-                              Ver todos os resultados para "{searchQuery}"
+                              Ver todos os resultados para &quot;{searchQuery}&quot;
                             </button>
                           </div>
                         )}
