@@ -26,11 +26,14 @@ export function CheckoutContent() {
   if (items.length === 0) {
     return (
       <div className="text-center py-12">
-        <h1 className="text-3xl font-bold text-text mb-4">Seu baú está vazio</h1>
-        <p className="text-muted-text mb-6">Adicione produtos ao carrinho antes de finalizar o pedido.</p>
+        <h1 className="text-3xl font-bold text-[#E0DEDC] mb-4">Seu baú está vazio</h1>
+        <p className="text-[#E0DEDC]/70 mb-6">Adicione produtos ao carrinho antes de finalizar o pedido.</p>
         <Link 
           href="/"
-          className="bg-primary text-primary-text px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity inline-block"
+          className="bg-gradient-to-r from-orange-600 to-[#DFA026] text-[#E0DEDC] px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity inline-block"
+          style={{
+            background: 'linear-gradient(to right, #ea580c, #DFA026)'
+          }}
         >
           Continuar Comprando
         </Link>
@@ -43,63 +46,69 @@ export function CheckoutContent() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-text mb-8">MEU BAÚ</h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2">
           <div className="space-y-4">
             {items.map((item) => (
-              <div key={item.id} className="bg-card rounded-lg p-4 flex gap-4">
-                {/* Product Image */}
-                <div className="w-24 h-24 rounded flex items-center justify-center flex-shrink-0 bg-gray-700 overflow-hidden">
-                  {item.image ? (
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 bg-gray-500 rounded-full"></div>
-                  )}
-                </div>
+              <div key={item.id} className="bg-[#281E19] rounded-lg p-4 md:p-6 relative">
+                {/* Trash Icon - Top Right */}
+                <button 
+                  onClick={() => removeItem(item.id)}
+                  className="absolute top-4 right-4 text-[#E0DEDC] hover:text-[#DFA026] transition-colors"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
                 
-                {/* Product Info */}
-                <div className="flex-1">
-                  <h3 className="text-card-text font-bold mb-1">{item.name}</h3>
-                  <p className="text-primary font-bold text-lg mb-3">
-                    R$ {item.price.toFixed(2).replace('.', ',')}
-                  </p>
-                  
-                  {/* Quantity Controls */}
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center border border-border rounded">
-                      <button 
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="px-3 py-1.5 text-card-text hover:bg-input transition-colors"
-                      >
-                        -
-                      </button>
-                      <span className="px-4 py-1.5 text-card-text">{item.quantity}</span>
-                      <button 
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="px-3 py-1.5 text-card-text hover:bg-input transition-colors"
-                      >
-                        +
-                      </button>
-                    </div>
-                    <button 
-                      onClick={() => removeItem(item.id)}
-                      className="ml-auto text-destructive hover:text-red-600 transition-colors"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                <div className="flex gap-4">
+                  {/* Product Image */}
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded flex items-center justify-center flex-shrink-0 bg-gray-700 overflow-hidden">
+                    {item.image ? (
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-600 flex items-center justify-center">
+                        <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
                   
-                  {/* Subtotal */}
-                  <p className="text-muted-text text-sm mt-2">
-                    Subtotal: R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
-                  </p>
+                  {/* Product Info */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[#E0DEDC] font-bold mb-2 uppercase text-sm md:text-base">{item.name}</h3>
+                    <p className="text-[#DFA026] font-bold text-lg md:text-xl mb-3">
+                      R$ {item.price.toFixed(2).replace('.', ',')}
+                    </p>
+                    
+                    {/* Quantity Controls */}
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center border border-[#3d3128] rounded overflow-hidden">
+                        <button 
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="px-3 py-1.5 md:px-4 md:py-2 bg-[#281E19] text-[#E0DEDC] hover:bg-[#322520] transition-colors"
+                        >
+                          -
+                        </button>
+                        <span className="px-4 md:px-6 py-1.5 md:py-2 text-[#E0DEDC] bg-[#281E19]">{item.quantity}</span>
+                        <button 
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="px-3 py-1.5 md:px-4 md:py-2 bg-[#281E19] text-[#E0DEDC] hover:bg-[#322520] transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Subtotal */}
+                    <p className="text-[#E0DEDC] text-sm">
+                      Subtotal: R$ {(item.price * item.quantity).toFixed(2).replace('.', ',')}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -108,35 +117,35 @@ export function CheckoutContent() {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-card rounded-lg p-6 sticky top-4">
-            <h2 className="text-xl font-bold text-card-text mb-4">Resumo do Pedido</h2>
+          <div className="bg-[#281E19] rounded-lg p-6 sticky top-4">
+            <h2 className="text-xl md:text-2xl font-bold text-[#E0DEDC] mb-6 uppercase">Resumo do Pedido</h2>
             
             <div className="space-y-3 mb-4">
-              <div className="flex justify-between text-card-text">
+              <div className="flex justify-between text-[#E0DEDC]">
                 <span>Subtotal:</span>
                 <span>R$ {total.toFixed(2).replace('.', ',')}</span>
               </div>
-              <div className="flex justify-between text-card-text">
+              <div className="flex justify-between text-[#E0DEDC]">
                 <span>Frete:</span>
-                <span className={hasFreeShipping ? 'text-primary font-bold' : ''}>
+                <span>
                   {hasFreeShipping ? 'Grátis' : 'Calculado no checkout'}
                 </span>
               </div>
             </div>
 
             {!hasFreeShipping && (
-              <div className="flex items-center gap-2 text-muted-text text-sm mb-4 p-3 bg-[#2a1f1a] rounded">
-                <Gift className="text-primary w-4 h-4" />
+              <div className="flex items-center gap-2 text-[#E0DEDC] text-sm mb-6 p-3 bg-[#1a140f] rounded-lg">
+                <Gift className="text-[#DFA026] w-4 h-4 flex-shrink-0" />
                 <span>
-                  Faltam R$ {(250 - total).toFixed(2).replace('.', ',')} para frete grátis
+                  Faltam <span className="text-[#DFA026] font-semibold">R$ {(250 - total).toFixed(2).replace('.', ',')}</span> para frete grátis
                 </span>
               </div>
             )}
 
-            <div className="border-t border-border pt-4 mb-4">
+            <div className="mb-6">
               <div className="flex justify-between items-center">
-                <span className="text-xl font-bold text-card-text">Total:</span>
-                <span className="text-2xl font-bold text-primary">
+                <span className="text-lg md:text-xl font-bold text-[#E0DEDC]">Total:</span>
+                <span className="text-xl md:text-2xl font-bold text-[#DFA026]">
                   R$ {total.toFixed(2).replace('.', ',')}
                 </span>
               </div>
@@ -194,7 +203,10 @@ export function CheckoutContent() {
                 }
               }}
               disabled={isProcessing}
-              className="w-full bg-primary text-primary-text py-3 rounded-lg font-bold hover:opacity-90 transition-opacity mb-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-orange-600 to-[#DFA026] text-[#E0DEDC] py-3 rounded-lg font-bold hover:opacity-90 transition-opacity mb-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 uppercase"
+              style={{
+                background: 'linear-gradient(to right, #ea580c, #DFA026)'
+              }}
             >
               {isProcessing ? (
                 <>
@@ -214,7 +226,7 @@ export function CheckoutContent() {
 
             <Link 
               href="/"
-              className="block w-full border border-primary text-primary py-3 rounded-lg font-semibold text-center hover:bg-primary hover:text-primary-text transition-colors"
+              className="block w-full bg-[#281E19] border border-[#3d3128] text-[#E0DEDC] py-3 rounded-lg font-semibold text-center hover:bg-[#322520] transition-colors"
             >
               Continuar Comprando
             </Link>

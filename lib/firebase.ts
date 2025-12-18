@@ -1,4 +1,6 @@
 // Configuração e inicialização do Firebase
+// IMPORTANTE: Este módulo só deve ser usado em componentes client-side ('use client')
+
 import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getAnalytics, Analytics, isSupported } from "firebase/analytics";
 import { getAuth, Auth } from "firebase/auth";
@@ -15,38 +17,47 @@ const firebaseConfig = {
   measurementId: "G-KWLLLCK147"
 };
 
-// Inicializar Firebase apenas uma vez (evitar múltiplas inicializações)
-let app: FirebaseApp;
-let analytics: Analytics | null = null;
-let auth: Auth;
-let db: Firestore;
+// Inicializar Firebase apenas no cliente
+let firebaseApp: FirebaseApp | null = null;
+let firebaseAnalytics: Analytics | null = null;
+let firebaseAuth: Auth | null = null;
+let firebaseDb: Firestore | null = null;
 
-// Função para inicializar o Firebase de forma segura
 function initializeFirebase() {
-  if (getApps().length === 0) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApps()[0];
+  // Só inicializar no cliente
+  if (typeof window === "undefined") {
+    return;
   }
-  
-  return app;
-}
 
-// Inicializar app
-app = initializeFirebase();
-
-// Inicializar Analytics apenas no cliente e se suportado
-if (typeof window !== "undefined") {
-  isSupported().then((supported) => {
-    if (supported) {
-      analytics = getAnalytics(app);
+  if (!firebaseApp) {
+    if (getApps().length === 0) {
+      firebaseApp = initializeApp(firebaseConfig);
+    } else {
+      firebaseApp = getApps()[0];
     }
-  });
+
+    firebaseAuth = getAuth(firebaseApp);
+    firebaseDb = getFirestore(firebaseApp);
+
+    // Inicializar Analytics assincronamente
+    isSupported().then((supported) => {
+      if (supported && firebaseApp) {
+        firebaseAnalytics = getAnalytics(firebaseApp);
+      }
+    });
+  }
 }
 
-// Inicializar Auth e Firestore (funcionam tanto no cliente quanto no servidor)
-auth = getAuth(app);
-db = getFirestore(app);
+// Inicializar quando o módulo for carregado no cliente
+if (typeof window !== "undefined") {
+  initializeFirebase();
+}
 
-export { app, analytics, auth, db };
-export default app;
+// Exportar instâncias (só disponíveis no cliente quando importado em 'use client')
+// TypeScript pode reclamar que podem ser null, mas em componentes 'use client' nunca serão
+export const app = firebaseApp as FirebaseApp | null;
+export const auth = firebaseAuth as Auth | null;
+export const db = firebaseDb as Firestore | null;
+export const analytics = firebaseAnalytics as Analytics | null;
+
+export default firebaseApp as FirebaseApp | null;

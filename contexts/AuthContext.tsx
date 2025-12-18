@@ -30,6 +30,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
@@ -40,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Criar documento do usuário no Firestore
   const createUserDocument = async (user: User, additionalData?: any) => {
-    if (!user) return;
+    if (!user || !db) return;
 
     const userRef = doc(db, 'users', user.uid);
     
@@ -68,6 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!auth) {
+      throw new Error('Firebase Auth não está disponível');
+    }
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
@@ -77,6 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, name: string) => {
+    if (!auth) {
+      throw new Error('Firebase Auth não está disponível');
+    }
     try {
       const { user } = await createUserWithEmailAndPassword(auth, email, password);
       
@@ -92,6 +102,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signInWithGoogle = async () => {
+    if (!auth) {
+      throw new Error('Firebase Auth não está disponível');
+    }
     try {
       const provider = new GoogleAuthProvider();
       const { user } = await signInWithPopup(auth, provider);
@@ -117,6 +130,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!auth) {
+      return;
+    }
     try {
       await firebaseSignOut(auth);
     } catch (error) {

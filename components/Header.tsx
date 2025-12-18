@@ -263,7 +263,7 @@ export default function Header() {
                 {user ? (
                   <div className="relative" ref={userMenuRef}>
                     <button
-                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      onClick={() => router.push('/conta')}
                       className="hidden md:flex items-center gap-2 text-secondary-text hover:text-primary transition-colors"
                     >
                       {user.photoURL ? (
@@ -283,30 +283,6 @@ export default function Header() {
                         {user.displayName || 'Usuário'}
                       </span>
                     </button>
-
-                    {/* Dropdown Menu */}
-                    {showUserMenu && (
-                      <div className="absolute right-0 top-full mt-2 w-48 bg-[#1d1816] border-2 border-[#DFA026] rounded-lg shadow-xl z-50 overflow-hidden">
-                        <div className="p-3 border-b border-[#DFA026]/20">
-                          <p className="text-[#ebe8e0] font-semibold truncate text-sm">
-                            {user.displayName || 'Usuário'}
-                          </p>
-                          <p className="text-[#ebe8e0]/60 text-xs truncate">
-                            {user.email}
-                          </p>
-                        </div>
-                        <button
-                          onClick={async () => {
-                            await signOut();
-                            setShowUserMenu(false);
-                          }}
-                          className="w-full px-3 py-2 text-left text-[#ebe8e0] hover:bg-[#2a1f1a] transition-colors flex items-center gap-2"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          <span>Sair</span>
-                        </button>
-                      </div>
-                    )}
                   </div>
                 ) : (
                   <button
@@ -684,15 +660,21 @@ export default function Header() {
               <div className="border-t border-[#DFA026]/20 pt-6">
                 {user ? (
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3 px-4 py-3 bg-[#2a1f1a] rounded-lg">
+                    <button
+                      onClick={() => {
+                        router.push('/conta');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 bg-[#2a1f1a] rounded-lg hover:bg-[#332520] transition-colors text-left"
+                    >
                       {user.photoURL ? (
                         <img
                           src={user.photoURL}
                           alt={user.displayName || 'Usuário'}
-                          className="w-12 h-12 rounded-full border-2 border-[#DFA026]"
+                          className="w-12 h-12 rounded-full border-2 border-[#DFA026] flex-shrink-0"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded-full bg-[#DFA026] flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-[#DFA026] flex items-center justify-center flex-shrink-0">
                           <span className="text-[#120f0d] font-bold text-xl">
                             {user.displayName?.[0] || user.email?.[0] || 'U'}
                           </span>
@@ -706,7 +688,7 @@ export default function Header() {
                           {user.email}
                         </p>
                       </div>
-                    </div>
+                    </button>
                     <button
                       onClick={async () => {
                         await signOut();
