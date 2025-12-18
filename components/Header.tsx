@@ -117,12 +117,30 @@ export default function Header() {
     router.push(`/produto/${handle}`);
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const fetchAllProducts = async () => {
+    setIsSearching(true);
+    try {
+      const response = await fetch('/api/products?limit=100');
+      const data = await response.json();
+      setSearchResults(data.products || []);
+      setIsSearchOpen(true);
+    } catch (error) {
+      console.error('Erro ao buscar todos os produtos:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearchSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/busca?q=${encodeURIComponent(searchQuery)}`);
       setIsSearchOpen(false);
       setSearchQuery('');
+    } else {
+      // Se não houver query, buscar e mostrar todos os produtos
+      await fetchAllProducts();
     }
   };
 
@@ -182,7 +200,7 @@ export default function Header() {
               {/* Search Bar - Desktop (na mesma linha) */}
               <div className="hidden md:block flex-1 max-w-2xl mx-8">
                 <form onSubmit={handleSearchSubmit} className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-text w-5 h-5" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#a09a96' }} />
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -190,9 +208,12 @@ export default function Header() {
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     onFocus={() => searchQuery && setIsSearchOpen(true)}
-                    className="w-full bg-input border border-border rounded-lg py-2 pl-10 pr-4 text-secondary-text placeholder-muted-text focus:outline-none focus:ring-2 focus:ring-focus-ring"
+                    className="w-full rounded-lg py-2 pl-10 pr-4 focus:outline-none"
                     style={{
-                      fontFamily: "'Cinzel', serif"
+                      fontFamily: "'Cinzel', serif",
+                      backgroundColor: '#4b382d',
+                      border: 'none',
+                      color: '#a09a96'
                     }}
                   />
                   {/* Resultados da busca */}
@@ -209,7 +230,10 @@ export default function Header() {
                         <>
                           <div className="p-2 border-b border-[#DFA026]/20">
                             <p className="text-sm text-secondary-text">
-                              {searchResults.length} resultado{searchResults.length !== 1 ? 's' : ''} encontrado{searchResults.length !== 1 ? 's' : ''}
+                              {searchQuery 
+                                ? `${searchResults.length} resultado${searchResults.length !== 1 ? 's' : ''} encontrado${searchResults.length !== 1 ? 's' : ''}`
+                                : `Todos os produtos (${searchResults.length})`
+                              }
                             </p>
                           </div>
                           {searchResults.map((product) => (
@@ -245,6 +269,20 @@ export default function Header() {
                               >
                                 Ver todos os resultados para &quot;{searchQuery}&quot;
                               </button>
+                            </div>
+                          )}
+                          {!searchQuery && searchResults.length > 0 && (
+                            <div className="p-2 border-t border-[#DFA026]/20">
+                              <Link
+                                href="/busca"
+                                className="w-full text-center text-[#DFA026] hover:text-[#E0B64D] transition-colors text-sm font-semibold block"
+                                onClick={() => {
+                                  setIsSearchOpen(false);
+                                  setSearchQuery('');
+                                }}
+                              >
+                                Ver todos os produtos
+                              </Link>
                             </div>
                           )}
                         </>
@@ -313,7 +351,7 @@ export default function Header() {
             {/* Search Bar - Mobile (abaixo da logo) */}
             <div className="md:hidden">
               <form onSubmit={handleSearchSubmit} className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-text w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#a09a96' }} />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -321,9 +359,12 @@ export default function Header() {
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   onFocus={() => searchQuery && setIsSearchOpen(true)}
-                  className="w-full bg-input border border-border rounded-lg py-2 pl-10 pr-4 text-secondary-text placeholder-muted-text focus:outline-none focus:ring-2 focus:ring-focus-ring"
+                  className="w-full rounded-lg py-2 pl-10 pr-4 focus:outline-none"
                   style={{
-                    fontFamily: "'Cinzel', serif"
+                    fontFamily: "'Cinzel', serif",
+                    backgroundColor: '#4b382d',
+                    border: 'none',
+                    color: '#a09a96'
                   }}
                 />
                 {/* Resultados da busca - Mobile */}
@@ -378,6 +419,20 @@ export default function Header() {
                             </button>
                           </div>
                         )}
+                        {!searchQuery && searchResults.length > 0 && (
+                          <div className="p-2 border-t border-[#DFA026]/20">
+                            <Link
+                              href="/busca"
+                              className="w-full text-center text-[#DFA026] hover:text-[#E0B64D] transition-colors text-sm font-semibold block"
+                              onClick={() => {
+                                setIsSearchOpen(false);
+                                setSearchQuery('');
+                              }}
+                            >
+                              Ver todos os produtos
+                            </Link>
+                          </div>
+                        )}
                       </>
                     ) : (
                       <div className="p-4 text-center text-secondary-text">
@@ -393,27 +448,19 @@ export default function Header() {
 
         {/* Navigation Bar - Marrom escuro (Secondary) */}
         <nav 
-          className="hidden md:block"
+          className="hidden md:block nav-menu"
           style={{
-            backgroundColor: '#2d2621',
-            borderTop: '1px solid #59514c',
-            borderBottom: '1px solid #59514c'
+            backgroundColor: '#2e2621',
+            borderTop: '0.5px solid #59514c',
+            borderBottom: '0.5px solid #59514c'
           }}
         >
           <div className="container mx-auto px-4">
-            <ul className="flex items-center justify-center gap-8 py-3">
+            <ul className="flex items-center justify-center gap-[3px] py-0">
               <li>
                 <Link 
                   href="#" 
-                  className="flex items-center gap-2 transition-colors"
-                  style={{
-                    fontFamily: 'var(--font-cinzel), serif',
-                    color: '#dcdcdc',
-                    fontSize: '14px',
-                    fontWeight: 400,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}
+                  className="nav-menu-item"
                 >
                   <span>⚔️</span>
                   <span>Miniaturas</span>
@@ -422,15 +469,7 @@ export default function Header() {
               <li>
                 <Link 
                   href="#" 
-                  className="flex items-center gap-2 transition-colors"
-                  style={{
-                    fontFamily: 'var(--font-cinzel), serif',
-                    color: '#dcdcdc',
-                    fontSize: '14px',
-                    fontWeight: 400,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}
+                  className="nav-menu-item"
                 >
                   <span>🎲</span>
                   <span>Dados de RPG</span>
@@ -439,15 +478,7 @@ export default function Header() {
               <li>
                 <Link 
                   href="#" 
-                  className="flex items-center gap-2 transition-colors"
-                  style={{
-                    fontFamily: 'var(--font-cinzel), serif',
-                    color: '#dcdcdc',
-                    fontSize: '14px',
-                    fontWeight: 400,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}
+                  className="nav-menu-item"
                 >
                   <span>🗺️</span>
                   <span>Grids e Mapas</span>
@@ -456,15 +487,7 @@ export default function Header() {
               <li>
                 <Link 
                   href="#" 
-                  className="flex items-center gap-2 transition-colors"
-                  style={{
-                    fontFamily: 'var(--font-cinzel), serif',
-                    color: '#dcdcdc',
-                    fontSize: '14px',
-                    fontWeight: 400,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}
+                  className="nav-menu-item"
                 >
                   <span>🏰</span>
                   <span>Cenários</span>
@@ -473,15 +496,7 @@ export default function Header() {
               <li>
                 <Link 
                   href="#" 
-                  className="flex items-center gap-2 transition-colors"
-                  style={{
-                    fontFamily: 'var(--font-cinzel), serif',
-                    color: '#dcdcdc',
-                    fontSize: '14px',
-                    fontWeight: 400,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}
+                  className="nav-menu-item"
                 >
                   <span>📖</span>
                   <span>Livros</span>
@@ -490,15 +505,7 @@ export default function Header() {
               <li>
                 <Link 
                   href="#" 
-                  className="flex items-center gap-2 transition-colors"
-                  style={{
-                    fontFamily: 'var(--font-cinzel), serif',
-                    color: '#dcdcdc',
-                    fontSize: '14px',
-                    fontWeight: 400,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}
+                  className="nav-menu-item"
                 >
                   <span>🎭</span>
                   <span>Acessórios</span>

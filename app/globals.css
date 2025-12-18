@@ -140,3 +140,30 @@ body {
   color: #ebe8e0;
   margin-bottom: 0.5em;
 }
+
+/* Estilo para a barra de pesquisa no header */
+header input[type="text"]::placeholder {
+  color: #a09a96;
+}
+
+/* Estilos para o menu de navegação */
+.nav-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 6px 17px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-family: var(--font-cinzel), serif;
+  color: #d4cdc5;
+  font-size: 14px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+
+.nav-menu-item:hover {
+  background-color: #5c4a2a;
+  color: #e0b86a;
+}
