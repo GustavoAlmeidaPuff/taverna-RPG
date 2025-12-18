@@ -2,7 +2,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 import { Search, ArrowLeft } from 'lucide-react';
-import { getAllProducts } from '@/lib/shopify';
+import { getAllProducts, Product } from '@/lib/shopify';
 import SearchProductCard from '@/components/SearchProductCard';
 
 interface SearchPageProps {
@@ -15,7 +15,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const query = params.q || '';
   
   // Buscar produtos
-  let products = [];
+  let products: Product[] = [];
   if (query.trim()) {
     const allProducts = await getAllProducts(100);
     const normalizedQuery = query.toLowerCase().trim();
