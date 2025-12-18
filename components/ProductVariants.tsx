@@ -78,11 +78,16 @@ export default function ProductVariants({
               className={`
                 flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border-2 transition-all
                 ${isSelected 
-                  ? 'border-primary bg-card ring-2 ring-primary/50' 
+                  ? 'bg-card' 
                   : 'border-border bg-background hover:border-primary/50'
                 }
                 ${!variant.available ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
               `}
+              style={isSelected ? {
+                borderColor: '#DFA026',
+                borderWidth: '3px',
+                boxShadow: '0 0 0 3px rgba(223, 160, 38, 0.4), 0 4px 16px rgba(223, 160, 38, 0.6), 0 0 24px rgba(223, 160, 38, 0.4)'
+              } : {}}
             >
               {/* Ícone/Imagem da Variante */}
               <div className="flex-shrink-0">
