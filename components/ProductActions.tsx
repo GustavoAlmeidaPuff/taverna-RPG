@@ -77,7 +77,7 @@ export default function ProductActions({ product, selectedVariant }: ProductActi
     }).format(price);
     
     // Mensagem pré-moldada da loja de RPG
-    const shareMessage = `🎲 *Olha o que eu encontrei na Taverna RPG!*\n\n*${product.name}*\n${formattedPrice}\n\n${product.description ? product.description.replace(/<[^>]*>/g, '').substring(0, 150) + '...' : 'Confira este produto incrível para suas aventuras épicas!'}\n\n🔗 ${productUrl}?utm_source=share&utm_medium=whatsapp`;
+    const shareMessage = `🎲 *Taverna!*\n\n*${product.name}*\n${formattedPrice}\n\n${product.description ? product.description.replace(/<[^>]*>/g, '').substring(0, 150) + '...' : 'Confira este produto incrível para suas aventuras épicas!'}\n\n🔗 ${productUrl}?utm_source=share&utm_medium=whatsapp`;
     
     // URL do WhatsApp com mensagem pré-preenchida
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;

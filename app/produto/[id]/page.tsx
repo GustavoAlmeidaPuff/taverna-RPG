@@ -32,8 +32,6 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     ? product.description.replace(/<[^>]*>/g, '').substring(0, 200)
     : `${product.name} – Confira na Taverna RPG Store. Dados, miniaturas e acessórios para suas aventuras épicas!`;
   
-  // Descrição completa para Open Graph (inclui preço)
-  const fullDescription = `${productDescription} | ${formattedPrice}`;
   const currency = 'BRL';
 
   return {
@@ -43,7 +41,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       type: 'website',
       url: productUrl,
       title: product.name,
-      description: fullDescription,
+      description: formattedPrice,
       images: [
         {
           url: productImage,
@@ -57,7 +55,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     twitter: {
       card: 'summary_large_image',
       title: product.name,
-      description: fullDescription,
+      description: formattedPrice,
       images: [productImage],
     },
     alternates: {
