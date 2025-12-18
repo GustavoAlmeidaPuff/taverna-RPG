@@ -37,3 +37,4 @@ export default function ProductDescription({ description, className = '' }: Prod
     </div>
   );
 }
+

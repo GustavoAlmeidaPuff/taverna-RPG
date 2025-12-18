@@ -152,3 +152,4 @@ Para receber notificações automáticas quando um pedido é pago:
 3. **Notificações**: Avisar quando pedido for confirmado
 4. **Rastreamento**: Integrar com sistema de rastreamento de entrega
 5. **Retry Logic**: Tentar novamente se verificação falhar
+

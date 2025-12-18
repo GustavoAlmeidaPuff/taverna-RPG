@@ -208,3 +208,4 @@ const secondPage = await getAllProducts(50, lastCursor);
 **Arquivos Modificados**:
 - `lib/shopify.ts` (limite aumentado + logs)
 - `app/page.tsx` (limite aumentado para 100)
+

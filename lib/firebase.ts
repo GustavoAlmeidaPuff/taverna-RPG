@@ -61,3 +61,4 @@ export const db = firebaseDb as Firestore | null;
 export const analytics = firebaseAnalytics as Analytics | null;
 
 export default firebaseApp as FirebaseApp | null;
+

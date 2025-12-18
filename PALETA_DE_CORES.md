@@ -103,3 +103,4 @@ O projeto utiliza classes Tailwind customizadas que devem ser definidas no `tail
 - Idealmente, todas as cores devem ser centralizadas no `tailwind.config.ts`
 - As cores podem ter pequenas variações dependendo do contexto de uso
 - O tema geral é escuro (dark theme) com acentos dourados
+

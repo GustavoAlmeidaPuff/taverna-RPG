@@ -263,3 +263,4 @@ function getErrorMessage(errorCode: string): string {
 
   return errorMessages[errorCode] || 'Erro ao processar sua solicitação.';
 }
+

@@ -179,3 +179,4 @@ console.log('Checkout criado com sucesso:', cartId);
 - `lib/shopify.ts`
 - `contexts/CartContext.tsx`
 - `components/CheckoutContent.tsx`
+

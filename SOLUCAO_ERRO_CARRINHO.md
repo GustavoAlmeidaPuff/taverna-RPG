@@ -69,3 +69,4 @@ Para evitar que usuários com carrinhos antigos tenham problemas, podemos implem
 3. Vá para o checkout
 4. Finalize o pedido
 5. Você deve ser redirecionado para o Shopify Checkout sem erros
+

@@ -221,3 +221,4 @@ Erros do Firebase Auth são traduzidos para português:
 - O design segue o padrão do site
 - A experiência do usuário é fluida e intuitiva
 - O código é modular e fácil de manter
+

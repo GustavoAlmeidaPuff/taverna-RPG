@@ -7,3 +7,4 @@ Disallow: /busca
 
 # Sitemap
 Sitemap: https://taverna-rpg-store.vercel.app/sitemap.xml
+

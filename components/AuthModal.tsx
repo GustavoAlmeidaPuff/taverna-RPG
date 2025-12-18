@@ -274,3 +274,4 @@ export default function AuthModal({ isOpen, onClose, redirectUrl, onSuccess }: A
     </>
   );
 }
+

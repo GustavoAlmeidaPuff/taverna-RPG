@@ -197,3 +197,4 @@ export default function SearchProductCard({ product }: SearchProductCardProps) {
     </>
   );
 }
+

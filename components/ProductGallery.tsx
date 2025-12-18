@@ -182,3 +182,4 @@ export default function ProductGallery({ images, badge, productName, primaryImag
     </div>
   );
 }
+

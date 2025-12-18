@@ -168,3 +168,4 @@ export default async function ProductDetail({ params }: { params: { id: string }
   );
 }
 
+

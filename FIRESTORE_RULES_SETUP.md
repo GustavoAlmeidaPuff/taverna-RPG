@@ -149,3 +149,4 @@ Após fazer o deploy das regras:
 - [Firebase Console](https://console.firebase.google.com/)
 - [Documentação Firebase Firestore Rules](https://firebase.google.com/docs/firestore/security/get-started)
 - [Firebase CLI Documentation](https://firebase.google.com/docs/cli)
+
