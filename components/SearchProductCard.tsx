@@ -41,23 +41,23 @@ export default function SearchProductCard({ product }: SearchProductCardProps) {
       </div>
 
       {/* Informações do produto */}
-      <div className="p-4">
-        <h3 className="text-secondary-text font-bold text-lg mb-2 line-clamp-2">
+      <div className="p-2 md:p-4">
+        <h3 className="text-secondary-text font-bold text-sm md:text-lg mb-1 md:mb-2 line-clamp-2">
           {product.name}
         </h3>
         <div className="flex items-center justify-between">
           <div>
             {product.originalPrice && product.originalPrice > product.price ? (
               <>
-                <p className="text-muted-text line-through text-sm">
+                <p className="text-muted-text line-through text-xs md:text-sm">
                   R$ {product.originalPrice.toFixed(2).replace('.', ',')}
                 </p>
-                <p className="text-primary font-bold text-xl">
+                <p className="text-primary font-bold text-base md:text-xl">
                   R$ {product.price.toFixed(2).replace('.', ',')}
                 </p>
               </>
             ) : (
-              <p className="text-primary font-bold text-xl">
+              <p className="text-primary font-bold text-base md:text-xl">
                 R$ {product.price.toFixed(2).replace('.', ',')}
               </p>
             )}
