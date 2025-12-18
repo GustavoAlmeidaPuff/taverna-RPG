@@ -74,8 +74,9 @@ tavernaRPG/
 - `npm start` - Inicia o servidor de produção
 - `npm run lint` - Executa o ESLint
 
-## 🔌 Integração com Shopify
+## 🔌 Integrações
 
+### Shopify
 A integração com Shopify foi configurada! Veja o arquivo `SHOPIFY_SETUP.md` para instruções detalhadas de configuração.
 
 **O que foi implementado:**
@@ -89,6 +90,26 @@ A integração com Shopify foi configurada! Veja o arquivo `SHOPIFY_SETUP.md` pa
 2. Configure `SHOPIFY_STORE_DOMAIN` e `SHOPIFY_STOREFRONT_ACCESS_TOKEN`
 3. Use as funções em `lib/shopify.ts` ou as APIs REST para buscar produtos
 
+### Firebase (Autenticação e Banco de Dados)
+Sistema completo de autenticação implementado! Veja `FIREBASE_SETUP.md` e `AUTH_SYSTEM.md` para detalhes.
+
+**O que foi implementado:**
+- ✅ Firebase configurado e conectado
+- ✅ Autenticação com Email/Senha
+- ✅ Autenticação com Google (OAuth)
+- ✅ Modal de Login/Cadastro com design consistente
+- ✅ Blockwalls no carrinho e checkout
+- ✅ Criação automática de perfil no Firestore
+- ✅ Gerenciamento de sessão
+- ✅ Interface de usuário no Header (perfil/logout)
+- ✅ Suporte mobile e desktop
+
+**Funcionalidades:**
+- Usuários devem fazer login para adicionar ao carrinho
+- Usuários devem fazer login para finalizar compra
+- Perfil do usuário exibido no header quando logado
+- Dados do usuário salvos automaticamente no Firestore
+
 ## 📝 Próximos Passos
 
 1. **Integração com Shopify** (em progresso)
@@ -97,13 +118,21 @@ A integração com Shopify foi configurada! Veja o arquivo `SHOPIFY_SETUP.md` pa
    - ⏳ Implementar carrinho de compras funcional
    - ⏳ Integrar checkout
 
-2. **Integração com Firebase**
-   - Autenticação de usuários (Firebase Auth)
-   - Salvar favoritos/curtidos (Firestore)
-   - Histórico de compras (Firestore)
-   - Sistema de avaliações (Firestore)
+2. **Autenticação e Perfil** (concluído ✅)
+   - ✅ Autenticação de usuários (Firebase Auth)
+   - ✅ Login com Email/Senha e Google
+   - ✅ Blockwalls no carrinho e checkout
+   - ✅ Modal de login/cadastro
+   - ✅ Criação automática de perfil no Firestore
+   - ⏳ Página de perfil do usuário
+   - ⏳ Recuperação de senha
 
-3. **Melhorias**
+3. **Recursos Firestore**
+   - ⏳ Salvar favoritos/curtidos (Firestore)
+   - ⏳ Histórico de compras (Firestore)
+   - ⏳ Sistema de avaliações (Firestore)
+
+4. **Melhorias**
    - Substituir imagens placeholder por imagens reais
    - Implementar busca funcional
    - Adicionar filtros de produtos

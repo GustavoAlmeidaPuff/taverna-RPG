@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '@/lib/shopify';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
+import AuthModal from '@/components/AuthModal';
 
 interface ProductsProps {
   title: string;
@@ -14,12 +16,22 @@ interface ProductsProps {
 
 export default function Products({ title, subtitle, products }: ProductsProps) {
   const { addItem } = useCart();
+  const { user } = useAuth();
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingProduct, setPendingProduct] = useState<Product | null>(null);
 
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!user) {
+      setPendingProduct(product);
+      setShowAuthModal(true);
+      return;
+    }
+    
     addItem(product);
   };
 
@@ -173,6 +185,21 @@ export default function Products({ title, subtitle, products }: ProductsProps) {
           </div>
         )}
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false);
+          setPendingProduct(null);
+        }}
+        onSuccess={() => {
+          if (pendingProduct) {
+            addItem(pendingProduct);
+            setPendingProduct(null);
+          }
+        }}
+      />
     </section>
   );
 }

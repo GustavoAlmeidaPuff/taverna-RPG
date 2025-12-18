@@ -4,10 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Search, User, X, Gift, Trash2, Menu, Icon } from 'lucide-react';
+import { Search, User, X, Gift, Trash2, Menu, Icon, LogOut } from 'lucide-react';
 import { chest } from '@lucide/lab';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Product } from '@/lib/shopify';
+import AuthModal from '@/components/AuthModal';
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -18,11 +20,15 @@ export default function Header() {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { items, removeItem, updateQuantity, getTotal, getItemCount } = useCart();
+  const { user, signOut } = useAuth();
 
   // Funções para fechar com animação
   const closeCart = () => {
@@ -85,6 +91,13 @@ export default function Header() {
         !searchInputRef.current.contains(event.target as Node)
       ) {
         setIsSearchOpen(false);
+      }
+      
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowUserMenu(false);
       }
     };
 
@@ -247,10 +260,63 @@ export default function Header() {
 
               {/* User and Cart Icons */}
               <div className="flex items-center gap-4">
-                <button className="hidden md:flex items-center gap-2 text-secondary-text hover:text-primary transition-colors">
-                  <User className="w-5 h-5" />
-                  <span>Entrar</span>
-                </button>
+                {user ? (
+                  <div className="relative" ref={userMenuRef}>
+                    <button
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="hidden md:flex items-center gap-2 text-secondary-text hover:text-primary transition-colors"
+                    >
+                      {user.photoURL ? (
+                        <img
+                          src={user.photoURL}
+                          alt={user.displayName || 'Usuário'}
+                          className="w-8 h-8 rounded-full border-2 border-[#DFA026]"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-[#DFA026] flex items-center justify-center">
+                          <span className="text-[#120f0d] font-bold text-sm">
+                            {user.displayName?.[0] || user.email?.[0] || 'U'}
+                          </span>
+                        </div>
+                      )}
+                      <span className="max-w-[100px] truncate">
+                        {user.displayName || 'Usuário'}
+                      </span>
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {showUserMenu && (
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-[#1d1816] border-2 border-[#DFA026] rounded-lg shadow-xl z-50 overflow-hidden">
+                        <div className="p-3 border-b border-[#DFA026]/20">
+                          <p className="text-[#ebe8e0] font-semibold truncate text-sm">
+                            {user.displayName || 'Usuário'}
+                          </p>
+                          <p className="text-[#ebe8e0]/60 text-xs truncate">
+                            {user.email}
+                          </p>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            await signOut();
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full px-3 py-2 text-left text-[#ebe8e0] hover:bg-[#2a1f1a] transition-colors flex items-center gap-2"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Sair</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="hidden md:flex items-center gap-2 text-secondary-text hover:text-primary transition-colors"
+                  >
+                    <User className="w-5 h-5" />
+                    <span>Entrar</span>
+                  </button>
+                )}
                 <button 
                   onClick={() => {
                     setIsCartOpen(true);
@@ -614,23 +680,67 @@ export default function Header() {
                 </ul>
               </nav>
 
-              {/* Login/Register Button */}
+              {/* Login/Register Button or User Info */}
               <div className="border-t border-[#DFA026]/20 pt-6">
-                <button 
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    // Aqui você pode adicionar a navegação para a página de login
-                  }}
-                  className="w-full flex items-center justify-center gap-3 bg-[#DFA026] text-[#201915] py-3 rounded-lg font-bold hover:bg-[#E0B64D] transition-colors"
-                >
-                  <User className="w-5 h-5" />
-                  <span>Entrar / Cadastrar</span>
-                </button>
+                {user ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 px-4 py-3 bg-[#2a1f1a] rounded-lg">
+                      {user.photoURL ? (
+                        <img
+                          src={user.photoURL}
+                          alt={user.displayName || 'Usuário'}
+                          className="w-12 h-12 rounded-full border-2 border-[#DFA026]"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-[#DFA026] flex items-center justify-center">
+                          <span className="text-[#120f0d] font-bold text-xl">
+                            {user.displayName?.[0] || user.email?.[0] || 'U'}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[#ebe8e0] font-semibold truncate">
+                          {user.displayName || 'Usuário'}
+                        </p>
+                        <p className="text-[#ebe8e0]/60 text-sm truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        await signOut();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center justify-center gap-3 bg-[#1d1816] border-2 border-[#DFA026] text-[#DFA026] py-3 rounded-lg font-bold hover:bg-[#2a1f1a] transition-colors"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>Sair</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="w-full flex items-center justify-center gap-3 bg-[#DFA026] text-[#201915] py-3 rounded-lg font-bold hover:bg-[#E0B64D] transition-colors"
+                  >
+                    <User className="w-5 h-5" />
+                    <span>Entrar / Cadastrar</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </>
   );
 }

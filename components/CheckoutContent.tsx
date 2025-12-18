@@ -1,11 +1,25 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { Trash2, Gift } from 'lucide-react';
+import AuthModal from '@/components/AuthModal';
 
 export function CheckoutContent() {
   const { items, removeItem, updateQuantity, getTotal } = useCart();
+  const { user } = useAuth();
+  const router = useRouter();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Redirecionar para login se não estiver autenticado ao acessar a página
+  useEffect(() => {
+    if (items.length > 0 && !user) {
+      setShowAuthModal(true);
+    }
+  }, [user, items.length]);
 
   if (items.length === 0) {
     return (
@@ -126,7 +140,17 @@ export function CheckoutContent() {
               </div>
             </div>
 
-            <button className="w-full bg-primary text-primary-text py-3 rounded-lg font-bold hover:opacity-90 transition-opacity mb-3">
+            <button 
+              onClick={() => {
+                if (!user) {
+                  setShowAuthModal(true);
+                  return;
+                }
+                // Aqui você pode adicionar a lógica de finalizar pedido
+                alert('Pedido finalizado! (Integração com pagamento será implementada)');
+              }}
+              className="w-full bg-primary text-primary-text py-3 rounded-lg font-bold hover:opacity-90 transition-opacity mb-3"
+            >
               FINALIZAR PEDIDO
             </button>
 
@@ -139,6 +163,12 @@ export function CheckoutContent() {
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
     </div>
   );
 }

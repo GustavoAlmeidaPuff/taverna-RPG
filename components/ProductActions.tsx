@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { ShoppingCart, Heart, Share2 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Product } from '@/lib/shopify';
+import AuthModal from '@/components/AuthModal';
 
 interface ProductActionsProps {
   product: Product;
@@ -11,9 +13,16 @@ interface ProductActionsProps {
 
 export default function ProductActions({ product }: ProductActionsProps) {
   const { addItem } = useCart();
+  const { user } = useAuth();
   const [quantity, setQuantity] = useState(1);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleAddToCart = () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+    
     for (let i = 0; i < quantity; i++) {
       addItem(product);
     }
@@ -116,6 +125,18 @@ export default function ProductActions({ product }: ProductActionsProps) {
           </button>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={() => {
+          // Após login bem-sucedido, adiciona o item ao carrinho
+          for (let i = 0; i < quantity; i++) {
+            addItem(product);
+          }
+        }}
+      />
     </div>
   );
 }
