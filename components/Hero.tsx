@@ -2,7 +2,7 @@ import { Dice6 } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <section className="relative min-h-[600px] flex items-center bg-background">
+    <section className="relative min-h-[300px] md:min-h-[600px] flex items-center bg-background">
       {/* PLACEHOLDER BACKGROUND IMAGE - será substituída por imagem real da taverna */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-30"
@@ -19,7 +19,7 @@ export default function Hero() {
         }}
       ></div>
       
-      <div className="container mx-auto pr-4 md:px-4 relative z-10 py-20">
+      <div className="container mx-auto pr-4 md:px-4 relative z-10 py-8 md:py-20">
         <div className="max-w-2xl pl-0 md:pl-12 ml-[10px] mr-0">
           {/* Welcome Badge */}
           <div 
@@ -50,12 +50,12 @@ export default function Hero() {
           </h1>
 
           {/* Description */}
-          <p className="text-secondary-text text-lg mb-8 leading-relaxed">
+          <p className="hidden md:block text-secondary-text text-lg mb-8 leading-relaxed">
             Dados épicos, miniaturas lendárias e tudo que você precisa para suas campanhas de RPG. Entre e descubra os tesouros da Taverna!
           </p>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 mb-6">
+          <div className="hidden md:flex gap-4 mb-6">
             <button 
               className="px-8 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity uppercase"
               style={{
